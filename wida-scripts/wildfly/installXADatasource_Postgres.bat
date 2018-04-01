@@ -1,0 +1,1 @@
+.\bin\jboss-cli.bat --file=c:\dev\git\java\wida-app\wida-scripts\wildfly\installXADatasource_Postgres.cli

@@ -1,0 +1,8 @@
+connect
+/subsystem=resource-adapters/resource-adapter=XADisk.rar:add(archive=xadisk-1.2.2.rar, transaction-support=XATransaction)
+/subsystem=resource-adapters/resource-adapter=XADisk.rar/config-properties=instanceId/:add(value=xadisk-instance)
+/subsystem=resource-adapters/resource-adapter=XADisk.rar/config-properties=xaDiskHome/:add(value="./filerepo")
+/subsystem=resource-adapters/resource-adapter=XADisk.rar/connection-definitions=XADiskConnectionFactoryPool:add(class-name=org.xadisk.connector.outbound.XADiskManagedConnectionFactory, jndi-name=java:/XADiskCF)
+/subsystem=resource-adapters/resource-adapter=XADisk.rar/connection-definitions=XADiskConnectionFactoryPool/config-properties=instanceId/:add(value=xadisk-instance)
+/subsystem=resource-adapters/resource-adapter=XADisk.rar/connection-definitions=XADiskConnectionFactoryPool:write-attribute(name=min-pool-size, value=1)
+/subsystem=resource-adapters/resource-adapter=XADisk.rar/connection-definitions=XADiskConnectionFactoryPool:write-attribute(name=max-pool-size, value=50)

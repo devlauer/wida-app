@@ -1,0 +1,28 @@
+connect
+# add driver as module
+# module add --name=org.postgres --resources=./postgresql-42.2.2.jar --dependencies=javax.api,javax.transaction.api
+
+# remove old driverconfig
+/subsystem=datasources/jdbc-driver=postgresql:remove()
+
+# add postgresql driver to available drivers
+/subsystem=datasources/jdbc-driver=postgresql:add(driver-name="postgresql",driver-module-name="org.postgres",driver-xa-datasource-class-name=org.postgresql.xa.PGXADataSource,driver-class-name=org.postgresql.Driver)
+
+# create xa datasource as batch
+batch
+xa-data-source add \  
+    --name=wida_xads \  
+    --driver-name=postgresql \  
+    --jndi-name=java:jboss/jdbc/wida_xads \  
+    --user-name=wida \  
+    --password=test123 \  
+    --recovery-username= wida \  
+    --recovery-password = test123 \  
+    --use-ccm=false \  
+    --max-pool-size=54 \  
+    --blocking-timeout-wait-millis=5000 \  
+    --new-connection-sql="set datestyle = ISO, European;"  
+/subsystem=datasources/xa-data-source=wida_xads/xa-datasource-properties=ServerName:add(value=localhost)  
+/subsystem=datasources/xa-data-source=wida_xads/xa-datasource-properties=PortNumber:add(value=5432)  
+/subsystem=datasources/xa-data-source=wida_xads/xa-datasource-properties=DatabaseName:add(value=wida)
+run-batch
