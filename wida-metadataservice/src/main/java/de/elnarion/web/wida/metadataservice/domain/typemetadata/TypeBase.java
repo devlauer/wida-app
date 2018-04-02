@@ -196,7 +196,6 @@ public abstract class TypeBase extends AbstractTypeDefinition
 		} else {
 			setTypeMutability(paramTypeDefinition.getTypeMutability());
 		}
-		setTablename(TypeHelper.convertTypeIdToTableOrColumnName(getId()));
 		updatePropertyDefinitions(paramTypeDefinition);
 	}
 
