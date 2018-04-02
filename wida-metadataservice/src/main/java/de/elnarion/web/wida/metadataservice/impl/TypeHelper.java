@@ -15,17 +15,10 @@
  ******************************************************************************/
 package de.elnarion.web.wida.metadataservice.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.chemistry.opencmis.commons.definitions.TypeDefinitionContainer;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisNameConstraintViolationException;
-import org.apache.chemistry.opencmis.commons.impl.dataobjects.TypeDefinitionContainerImpl;
 
 import de.elnarion.web.wida.common.WidaErrorConstants;
 import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
-import de.elnarion.web.wida.metadataservice.domain.typemetadata.TypeBase;
 
 /**
  * The Class TypeHelper is a helper class which provides several static helper
@@ -53,25 +46,5 @@ public class TypeHelper implements WidaErrorConstants {
 		return paramTypeId;
 	}
 
-	/**
-	 * Converts the internal type structure into TypeContainer objects
-	 *
-	 * @param typeBase
-	 *            the type base
-	 * @return the type definition container
-	 */
-	public static TypeDefinitionContainer convertTypeBaseToTypeContainer(TypeBase typeBase) {
-		TypeDefinitionContainerImpl typeContainer = new TypeDefinitionContainerImpl();
-		typeContainer.setTypeDefinition(typeBase);
-		Set<TypeBase> children = typeBase.getChildren();
-		List<TypeDefinitionContainer> typeContainerList = new ArrayList<TypeDefinitionContainer>();
-		typeContainer.setChildren(typeContainerList);
-		if (children != null) {
-			for (TypeBase child : children) {
-				TypeDefinitionContainer childContainer = convertTypeBaseToTypeContainer(child);
-				typeContainerList.add(childContainer);
-			}
-		}
-		return typeContainer;
-	}
+
 }

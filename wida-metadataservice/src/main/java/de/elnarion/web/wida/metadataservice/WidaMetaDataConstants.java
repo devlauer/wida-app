@@ -15,7 +15,6 @@
  ******************************************************************************/
 package de.elnarion.web.wida.metadataservice;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface WidaMetaDataConstants.
  */
@@ -67,6 +66,9 @@ public interface WidaMetaDataConstants {
 	/** The Constant METADATA_TYPE_TYPEBASE_DEFINITION_TABLE. */
 	public static final String METADATA_TYPE_TYPEBASE_DEFINITION_TABLE = METADATA_TYPE_TABLE_PREFIX+"typebase";
 
+	/** The Constant METADATA_TYPE_VERSION_LOCK_TABLE. */
+	public static final String METADATA_TYPE_VERSION_LOCK_TABLE = METADATA_TYPE_TABLE_PREFIX+"versionlock";
+	
 	/** The Constant METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE. */
 	public static final String METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE = METADATA_TYPE_TABLE_PREFIX+"typedocument";
 
@@ -75,6 +77,9 @@ public interface WidaMetaDataConstants {
 
 	/** The Constant METADATA_TYPE_TYPE_TO_PROPERTY_TYPE_TABLE. */
 	public static final String METADATA_TYPE_TYPE_TO_PROPERTY_TYPE_TABLE = METADATA_TYPE_TABLE_PREFIX+"type_to_prop_def";
+	
+	/** The Constant METADATA_VERSION_LOCK_KEY. */
+	public static final String METADATA_VERSION_LOCK_KEY = "type_version_lock";
 
 	// type mapping
 	

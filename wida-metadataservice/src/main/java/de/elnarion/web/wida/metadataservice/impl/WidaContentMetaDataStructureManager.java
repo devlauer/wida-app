@@ -17,6 +17,7 @@ package de.elnarion.web.wida.metadataservice.impl;
 
 import java.math.BigInteger;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
@@ -85,6 +87,12 @@ public class WidaContentMetaDataStructureManager {
 	@PropertiesResource(name = "metadataservice.properties")
 	private Properties metadataserviceProperties;
 
+	private Database databaseModel;
+
+	private CloneHelper cloneHelper = new CloneHelper();
+
+	private Platform platform = null;
+
 	/**
 	 * Compares the structure of the database with the TypeDefinition and adds
 	 * missing tables and columns. Because this repository does not allow to remove
@@ -92,14 +100,14 @@ public class WidaContentMetaDataStructureManager {
 	 *
 	 * @param paramTypeWithSubHierarchy
 	 *            the param type with sub hierarchy
+	 * @param ignoreTypeHierarchy
+	 *            the ignore type hierarchy
 	 */
 	@Lock(LockType.WRITE)
 	@Transactional
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void updateDatabaseStructure(TypeBase paramTypeWithSubHierarchy) {
-		String dbName = metadataserviceProperties.getProperty(METADATASERVICE_DB_NAME);
-		Platform platform = PlatformFactory.createNewPlatformInstance(getWidaDatasource());
-		Database actualMetadata = platform.readModelFromDatabase(dbName);
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void updateDatabaseStructure(TypeBase paramTypeWithSubHierarchy, boolean ignoreTypeHierarchy) {
+		Database actualMetadata = databaseModel;
 		CloneHelper cloneHelper = new CloneHelper();
 		Database desiredMetaData = cloneHelper.clone(actualMetadata);
 
@@ -107,14 +115,22 @@ public class WidaContentMetaDataStructureManager {
 		// database structure and are accessed via JPA - process only dynamic child
 		// types
 		if (paramTypeWithSubHierarchy.getBaseTypeId().value().equals(paramTypeWithSubHierarchy.getId())) {
-			Set<TypeBase> children = paramTypeWithSubHierarchy.getChildren();
-			if (children != null && children.size() > 0) {
-				updateModel(children, desiredMetaData);
+			if (!ignoreTypeHierarchy) {
+				Set<TypeBase> children = paramTypeWithSubHierarchy.getChildren();
+				if (children != null && children.size() > 0) {
+					updateModel(children, desiredMetaData);
+				}
+			}
+			else
+			{
+				// nothing to do return no childs to process and no base type to process
+				return;
 			}
 		} else {
-			updateModel(paramTypeWithSubHierarchy, desiredMetaData);
+			updateModel(paramTypeWithSubHierarchy, desiredMetaData,ignoreTypeHierarchy);
 		}
 		platform.alterModel(actualMetadata, desiredMetaData, false);
+		reReadModel();
 	}
 
 	/**
@@ -127,7 +143,7 @@ public class WidaContentMetaDataStructureManager {
 	 */
 	private void updateModel(Set<TypeBase> children, Database desiredMetaData) {
 		for (TypeBase typeDefinition : children) {
-			updateModel(typeDefinition, desiredMetaData);
+			updateModel(typeDefinition, desiredMetaData, false);
 		}
 	}
 
@@ -139,7 +155,7 @@ public class WidaContentMetaDataStructureManager {
 	 * @param desiredMetaData
 	 *            the desired meta data
 	 */
-	private void updateModel(TypeBase typeDefinition, Database desiredMetaData) {
+	private void updateModel(TypeBase typeDefinition, Database desiredMetaData, boolean ignoreHierarchy) {
 		String tableName = typeDefinition.getTablename();
 		Table typeDefinitionTable = desiredMetaData.findTable(tableName);
 		if (typeDefinitionTable == null) {
@@ -181,6 +197,12 @@ public class WidaContentMetaDataStructureManager {
 				defineMultiValuePropertyTable(desiredMetaData, propertyDefinition, typeDefinition.getTablename());
 			}
 
+		}
+		if (!ignoreHierarchy) {
+			Set<TypeBase> children = typeDefinition.getChildren();
+			if (children != null && children.size() > 0) {
+				updateModel(children, desiredMetaData);
+			}
 		}
 	}
 
@@ -326,13 +348,13 @@ public class WidaContentMetaDataStructureManager {
 			tidColumn.setAutoIncrement(false);
 			tidColumn.setDescription("This parent_id column references the id column of the table " + tablename);
 			multivalueTable.addColumn(tidColumn);
-			
+
 			IndexColumn tindexColumn = new IndexColumn();
 			tindexColumn.setColumn(tidColumn);
 
 			NonUniqueIndex tidIndex = new NonUniqueIndex();
-			tidIndex.setName(WidaMetaDataConstants.METADATA_INDEX_PREFIX+multivaluetablename+"_parent_id");
-			multivalueTable.addIndex(tidIndex);			
+			tidIndex.setName(WidaMetaDataConstants.METADATA_INDEX_PREFIX + multivaluetablename + "_parent_id");
+			multivalueTable.addIndex(tidIndex);
 
 			Table parentTypeTable = desiredMetaData.findTable(tablename);
 			if (parentTypeTable == null)
@@ -354,21 +376,6 @@ public class WidaContentMetaDataStructureManager {
 
 	private String createMultivalueTablename(PropertyDefinitionBase<?> propertyDefinition, String tablename) {
 		return tablename + "_multi_" + propertyDefinition.getColumnName();
-	}
-
-	/**
-	 * Gets the database structure.
-	 *
-	 * @return Object - the database structure
-	 */
-	@Lock(LockType.READ)
-	@Transactional
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Database getDatabaseStructure() {
-		String dbName = metadataserviceProperties.getProperty(METADATASERVICE_DB_NAME);
-		Platform platform = PlatformFactory.createNewPlatformInstance(getWidaDatasource());
-		Database actualMetadata = platform.readModelFromDatabase(dbName);
-		return actualMetadata;
 	}
 
 	/**
@@ -423,9 +430,7 @@ public class WidaContentMetaDataStructureManager {
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public Map<String, Object> fetchPropertiesForId(TypeBase paramType, Long paramId) {
 		Map<String, Object> resultProperties = new HashMap<>();
-		Database databaseModel = getDatabaseStructure();
-		Platform platform = PlatformFactory.createNewPlatformInstance(getWidaDatasource());
-		fetchValuesForType(paramType, databaseModel, resultProperties, platform, paramId);
+		fetchValuesForType(paramType, resultProperties, platform, paramId);
 		return resultProperties;
 	}
 
@@ -438,8 +443,8 @@ public class WidaContentMetaDataStructureManager {
 		}
 	}
 
-	private void fetchValuesForType(TypeBase paramTypeBase, Database databaseModel, Map<String, Object> properties,
-			Platform platform, Long paramId) {
+	private void fetchValuesForType(TypeBase paramTypeBase, Map<String, Object> properties, Platform platform,
+			Long paramId) {
 		// empty parent should be ignored although this should not happen (empty parent
 		// is only allowed for base types)
 		if (paramTypeBase == null)
@@ -462,36 +467,91 @@ public class WidaContentMetaDataStructureManager {
 					DynaBean tableRow = result.iterator().next();
 					Object value = tableRow.get(propertyDefinition.getColumnName());
 					properties.put(propertyDefinition.getId(), value);
-				}
-				else
-				{
-					String multivalueTableName = createMultivalueTablename(propertyDefinition, paramTypeBase.getTablename());
-					fetchMultiValueTableRows(propertyDefinition,multivalueTableName,databaseModel,platform,properties,paramId);
+				} else {
+					String multivalueTableName = createMultivalueTablename(propertyDefinition,
+							paramTypeBase.getTablename());
+					fetchMultiValueTableRows(propertyDefinition, multivalueTableName, platform, properties, paramId);
 				}
 			}
 		}
-		fetchValuesForType(paramTypeBase.getParent(), databaseModel, properties, platform, paramId);
+		fetchValuesForType(paramTypeBase.getParent(), properties, platform, paramId);
 	}
 
-	private void fetchMultiValueTableRows(PropertyDefinitionBase<?> property,String multivalueTableName, Database databaseModel, Platform platform,
-			Map<String, Object> properties, Long paramId) {
+	private void fetchMultiValueTableRows(PropertyDefinitionBase<?> property, String multivalueTableName,
+			Platform platform, Map<String, Object> properties, Long paramId) {
 		Table multivalueTable = databaseModel.findTable(multivalueTableName);
 		List<DynaBean> result = platform.fetch(databaseModel,
-				"SELECT * FROM " + asIdentifier(platform, multivalueTableName) + " where parent_id=" + paramId,new Table[] { multivalueTable });
-		if(result!=null)
-		{
+				"SELECT * FROM " + asIdentifier(platform, multivalueTableName) + " where parent_id=" + paramId,
+				new Table[] { multivalueTable });
+		if (result != null) {
 			List<Object> values = new Vector<>();
 			properties.put(property.getId(), values);
-			for(DynaBean dbean:result)
-			{
+			for (DynaBean dbean : result) {
 				Object value = dbean.get(property.getColumnName());
 				values.add(value);
 			}
-		}
-		else
-		{
+		} else {
 			properties.put(property.getId(), new Vector<>());
 		}
+	}
+
+	/**
+	 * Re read model in a separate transaction.
+	 */
+	@Transactional
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@Lock(LockType.WRITE)
+	public void reReadModel() {
+		String dbName = metadataserviceProperties.getProperty(METADATASERVICE_DB_NAME);
+		databaseModel = platform.readModelFromDatabase(dbName);
+	}
+
+	/**
+	 * Drop tables.
+	 *
+	 * @param repoValue
+	 *            the repo value
+	 */
+	@Transactional
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Lock(LockType.WRITE)
+	public void dropTables(TypeBase repoValue) {
+		List<Table> tablesToDrop = new ArrayList<>();
+		findAndAddTableObjectsForType(repoValue, tablesToDrop);
+		Database desiredModel = cloneHelper.clone(databaseModel);
+		desiredModel.removeTables(tablesToDrop.toArray(new Table[0]));
+		reReadModel();
+	}
+
+	private void findAndAddTableObjectsForType(TypeBase repoValue, List<Table> tablesToDrop) {
+		String tablename = repoValue.getTablename();
+		// first add property tables
+		List<PropertyDefinitionBase<?>> properties = repoValue.getPropertyDefinitionsList();
+		if (properties != null)
+			for (PropertyDefinitionBase<?> propertyDefinition : properties) {
+				if (Cardinality.MULTI.equals(propertyDefinition.getCardinality())) {
+					String multivaluetablename = createMultivalueTablename(propertyDefinition, tablename);
+					Table multivalueTable = databaseModel.findTable(multivaluetablename);
+					tablesToDrop.add(multivalueTable);
+				}
+			}
+		// second add type tables
+		Set<TypeBase> children = repoValue.getChildren();
+		if (children != null)
+			for (TypeBase child : children) {
+				findAndAddTableObjectsForType(child, tablesToDrop);
+			}
+		// last add own table
+		Table typeTable = databaseModel.findTable(tablename);
+		tablesToDrop.add(typeTable);
+	}
+
+	/**
+	 * Inits the singleton bean.
+	 */
+	@PostConstruct
+	public void init() {
+		platform = PlatformFactory.createNewPlatformInstance(getWidaDatasource());
 	}
 
 }
