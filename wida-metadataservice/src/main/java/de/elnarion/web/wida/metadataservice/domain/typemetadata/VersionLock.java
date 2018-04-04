@@ -23,10 +23,20 @@ public class VersionLock {
 	
 	/**
 	 * Instantiates a new version lock.
+	 *
+	 * @param paramLockType
+	 *            the param lock type
+	 */
+	public VersionLock(String paramLockType) {
+		locktype = paramLockType;
+	}
+
+	/**
+	 * Instantiates a new version lock.
 	 */
 	public VersionLock() {
 	}
-
+	
 	/**
 	 * Gets the locktype.
 	 *
