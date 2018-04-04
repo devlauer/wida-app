@@ -113,7 +113,6 @@ public class DocumentIntegrationTest extends WildflyTestServerSetup {
 		document.setParent(testFolder);
 		
 		entityManager.persist(document);
-		System.out.println(document.getId());
 
 		userTransaction.commit();
 		// clear the persistence context (first-level cache)
