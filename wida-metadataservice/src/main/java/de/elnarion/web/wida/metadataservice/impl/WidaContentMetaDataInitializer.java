@@ -29,7 +29,7 @@ import de.elnarion.web.wida.metadataservice.WidaContentMetaDataService;
  */
 @Singleton
 @Startup
-@DependsOn("WidaTypeBaseMetaDataInitializer")
+@DependsOn("WidaTypeMetaDataServiceImpl")
 public class WidaContentMetaDataInitializer {
 
 	/** The content meta data service. */
