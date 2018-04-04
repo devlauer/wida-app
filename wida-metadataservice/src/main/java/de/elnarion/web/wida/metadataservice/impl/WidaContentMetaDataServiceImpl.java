@@ -26,6 +26,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -104,7 +105,15 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 		CriteriaQuery<Folder> query = cb.createQuery(Folder.class);
 		Root<Folder> rootCriteria = query.from(Folder.class);
 		query.where(cb.equal(rootCriteria.get(Folder_.objectId), paramObjectId));
-		Folder folder = entityManager.createQuery(query).getSingleResult();
+		Folder folder = null;
+		try
+		{
+			folder = entityManager.createQuery(query).getSingleResult();
+		}
+		catch(NoResultException e)
+		{
+			return null;
+		}
 		if(folder.getBaseTypeId()!=folder.getObjectTypeId())
 		{
 			String objectTypeId = folder.getObjectTypeId();
