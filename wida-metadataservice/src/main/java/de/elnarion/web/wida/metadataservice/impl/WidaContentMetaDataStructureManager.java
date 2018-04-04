@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
@@ -54,7 +53,6 @@ import de.elnarion.ddlutils.model.NonUniqueIndex;
 import de.elnarion.ddlutils.model.Reference;
 import de.elnarion.ddlutils.model.Table;
 import de.elnarion.web.wida.common.WidaErrorConstants;
-import de.elnarion.web.wida.common.ejbhelper.PropertiesResource;
 import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
 import de.elnarion.web.wida.metadataservice.domain.typemetadata.PropertyDefinitionBase;
 import de.elnarion.web.wida.metadataservice.domain.typemetadata.PropertyDefinitionBoolean;
@@ -76,16 +74,9 @@ import de.elnarion.web.wida.metadataservice.domain.typemetadata.TypeBase;
 @ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
 public class WidaContentMetaDataStructureManager {
 
-	/** The Constant METADATASERVICE_DB_NAME. */
-	private static final String METADATASERVICE_DB_NAME = "metadataservice.db.name";
-
 	/** The wida datasource. */
 	@Resource(lookup = "jdbc/wida_xads", type = DataSource.class)
 	private DataSource widaDatasource;
-
-	/** The metadataservice properties. */
-	@PropertiesResource(name = "metadataservice.properties")
-	private Properties metadataserviceProperties;
 
 	private Database databaseModel;
 
@@ -108,6 +99,7 @@ public class WidaContentMetaDataStructureManager {
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void updateDatabaseStructure(TypeBase paramTypeWithSubHierarchy, boolean ignoreTypeHierarchy) {
 		Database actualMetadata = databaseModel;
+		
 		CloneHelper cloneHelper = new CloneHelper();
 		Database desiredMetaData = cloneHelper.clone(actualMetadata);
 
@@ -397,24 +389,6 @@ public class WidaContentMetaDataStructureManager {
 		this.widaDatasource = widaDatasource;
 	}
 
-	/**
-	 * Gets the metadataservice properties.
-	 *
-	 * @return Properties - the metadataservice properties
-	 */
-	public Properties getMetadataserviceProperties() {
-		return metadataserviceProperties;
-	}
-
-	/**
-	 * Sets the metadataservice properties.
-	 *
-	 * @param metadataserviceProperties
-	 *            the metadataservice properties
-	 */
-	public void setMetadataserviceProperties(Properties metadataserviceProperties) {
-		this.metadataserviceProperties = metadataserviceProperties;
-	}
 
 	/**
 	 * Fetch properties for id.
@@ -502,8 +476,7 @@ public class WidaContentMetaDataStructureManager {
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Lock(LockType.WRITE)
 	public void reReadModel() {
-		String dbName = metadataserviceProperties.getProperty(METADATASERVICE_DB_NAME);
-		databaseModel = platform.readModelFromDatabase(dbName);
+		databaseModel = platform.readModelFromDatabase(WidaMetaDataConstants.METADATA_DB_SCHEMA);
 	}
 
 	/**
@@ -549,9 +522,12 @@ public class WidaContentMetaDataStructureManager {
 	/**
 	 * Inits the singleton bean.
 	 */
+	@Transactional
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@PostConstruct
 	public void init() {
 		platform = PlatformFactory.createNewPlatformInstance(getWidaDatasource());
+		reReadModel();
 	}
 
 }

@@ -35,6 +35,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -53,6 +54,7 @@ import org.apache.chemistry.opencmis.commons.definitions.SecondaryTypeDefinition
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinitionContainer;
 import org.apache.chemistry.opencmis.commons.enums.CmisVersion;
+import org.apache.chemistry.opencmis.commons.enums.ContentStreamAllowed;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisInvalidArgumentException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisNotSupportedException;
@@ -87,7 +89,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	/** The structure manager. */
 	@EJB
 	private WidaContentMetaDataStructureManager structureManager;
-	
+
 	private VersionLock versionLock;
 
 	private Map<String, TypeBase> typedefinitions = new HashMap<>();
@@ -120,7 +122,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Lock(LockType.READ)
 	public TypeDefinitionContainer getTypeById(String typeId) {
-		checkAndRenewTypeDefinitions();
+		checkAndRenewTypeDefinitions(false);
 		TypeBase typeBase = typedefinitions.get(typeId);
 		if (typeBase != null) {
 			return convertTypeBaseToTypeContainer(typeBase);
@@ -137,7 +139,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	 */
 	private TypeDefinitionContainer convertTypeBaseToTypeContainer(TypeBase typeBase) {
 		TypeDefinitionContainerImpl typeContainer = new TypeDefinitionContainerImpl();
-		typeContainer.setTypeDefinition(typeDefinitionFactory.copy(typeBase,true));
+		typeContainer.setTypeDefinition(typeDefinitionFactory.copy(typeBase, true));
 		Set<TypeBase> children = typeBase.getChildren();
 		List<TypeDefinitionContainer> typeContainerList = new ArrayList<TypeDefinitionContainer>();
 		typeContainer.setChildren(typeContainerList);
@@ -155,20 +157,18 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	 */
 	private void reReadTypesMap() {
 		CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
-        CriteriaQuery<TypeBase> cq = cb.createQuery(TypeBase.class);
-        Root<TypeBase> rootEntry = cq.from(TypeBase.class);
-        CriteriaQuery<TypeBase> all = cq.select(rootEntry);
-        TypedQuery<TypeBase> allQuery = getEntityManager().createQuery(all);
+		CriteriaQuery<TypeBase> cq = cb.createQuery(TypeBase.class);
+		Root<TypeBase> rootEntry = cq.from(TypeBase.class);
+		CriteriaQuery<TypeBase> all = cq.select(rootEntry);
+		TypedQuery<TypeBase> allQuery = getEntityManager().createQuery(all);
 		List<TypeBase> typeBaseList = allQuery.getResultList();
 		Map<String, TypeBase> newDefinitionsMap = new HashMap<>();
 		Map<String, PropertyDefinitionBase<?>> newPropertyDefinitions = new HashMap<>();
-		for(TypeBase typeBase:typeBaseList)
-		{
-			newDefinitionsMap.put(typeBase.getId(),typeBase);
+		for (TypeBase typeBase : typeBaseList) {
+			newDefinitionsMap.put(typeBase.getId(), typeBase);
 			List<PropertyDefinitionBase<?>> internalPropertyDefinitions = typeBase.getPropertyDefinitionsList();
-			for(PropertyDefinitionBase<?> propertyDefinition:internalPropertyDefinitions)
-			{
-				newPropertyDefinitions.put(propertyDefinition.getId(),propertyDefinition);
+			for (PropertyDefinitionBase<?> propertyDefinition : internalPropertyDefinitions) {
+				newPropertyDefinitions.put(propertyDefinition.getId(), propertyDefinition);
 			}
 		}
 		synchronized (typedefinitions) {
@@ -193,10 +193,10 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Lock(LockType.READ)
 	public TypeDefinition getTypeByQueryName(String typeQueryName) {
-		checkAndRenewTypeDefinitions();
+		checkAndRenewTypeDefinitions(false);
 		Collection<TypeBase> typedefinitionList = typedefinitions.values();
-		for(TypeBase typeBase:typedefinitionList)
-			if(typeQueryName.equals(typeBase.getQueryName()))
+		for (TypeBase typeBase : typedefinitionList)
+			if (typeQueryName.equals(typeBase.getQueryName()))
 				return typeBase;
 		return null;
 	}
@@ -212,7 +212,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Lock(LockType.READ)
 	public Collection<TypeDefinitionContainer> getTypeDefinitionList() {
-		checkAndRenewTypeDefinitions();
+		checkAndRenewTypeDefinitions(false);
 		Collection<TypeBase> allTypes = typedefinitions.values();
 		if (allTypes != null) {
 			List<TypeDefinitionContainer> resultList = new ArrayList<>();
@@ -242,7 +242,14 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 			// add the missing base document type
 			MutableDocumentTypeDefinition documentType = typeDefinitionFactory
 					.createBaseDocumentTypeDefinition(CmisVersion.CMIS_1_1);
+			// set repository specific information
+			documentType.setContentStreamAllowed(ContentStreamAllowed.REQUIRED);
+			documentType.setIsVersionable(false);
+			documentType.setIsFileable(true);
+			documentType.setIsQueryable(true);
+
 			addTypeDefinition(documentType, false);
+
 			rootTypesList.add(getTypeById(OBJECT_BASE_TYPE_DOCUMENT));
 		}
 
@@ -292,10 +299,9 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@Override
 	@Transactional
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	@Lock(LockType.READ)
+	@Lock(LockType.WRITE)
 	public void addTypeDefinition(TypeDefinition paramNewTypeDefinition, boolean paramAddInheritedProperties) {
-		checkAndRenewTypeDefinitions();
-		aquireWriteVersionLock();
+		checkAndRenewTypeDefinitions(true);
 		// ignore paramAddInheritedProperties because CMIS-API allows only inheritance
 		// for type creation
 
@@ -332,10 +338,34 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 							+ paramNewTypeDefinition.getClass().getName(),
 					TYPE_NOT_CHILD_OF_ALLOWED_BASIC_TYPES);
 		}
-		structureManager.updateDatabaseStructure(newRepoTypeDefinition,true);
+
+		// base types share their property definitions so add existing instead of given
+		// ones
+		if (newRepoTypeDefinition.getId().equals(newRepoTypeDefinition.getBaseTypeId().value())) {
+			List<PropertyDefinitionBase<?>> properties = newRepoTypeDefinition.getPropertyDefinitionsList();
+			List<PropertyDefinitionBase<?>> propertiesToReplace = new ArrayList<>();
+			for (PropertyDefinitionBase<?> newPropDef : properties) {
+				PropertyDefinitionBase<?> repoProp = null;
+				try {
+					repoProp = entityManager.find(PropertyDefinitionBase.class, newPropDef.getId());
+				} catch (NoResultException e) {
+					// do nothing
+				}
+				if (repoProp != null) {
+					propertiesToReplace.add(repoProp);
+				} else {
+					propertiesToReplace.add(newPropDef);
+				}
+			}
+			newRepoTypeDefinition.removeAllPropertyDefinitions();
+			newRepoTypeDefinition.setPropertyDefinitionsList(propertiesToReplace);
+		}
+
+		structureManager.updateDatabaseStructure(newRepoTypeDefinition, true);
 		entityManager.persist(newRepoTypeDefinition);
 		releaseWriteVersionLock(true);
-		typedefinitions.put(newRepoTypeDefinition.getId(), newRepoTypeDefinition);
+		entityManager.flush();
+		reReadTypesMap();
 	}
 
 	private void releaseWriteVersionLock(boolean increaseVersion) {
@@ -344,28 +374,33 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 		entityManager.persist(versionLock);
 	}
 
-	private boolean checkVersionLockRenewed() {
-		VersionLock versionFromDb = entityManager.find(VersionLock.class,
-				WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY,LockModeType.OPTIMISTIC);
-		if (versionLock.getVersion() < versionFromDb.getVersion())
-			return true;
+	private boolean checkVersionLockRenewed(boolean lockwriteMode) {
+		VersionLock versionFromDb = null;
+		try {
+			versionFromDb = getFromDb(lockwriteMode);
+			if (versionFromDb != null && versionLock != null) {
+				if (versionLock.getVersion() < versionFromDb.getVersion()) {
+					return true;
+				} else
+					return false;
+			}
+		} catch (NoResultException e) {
+			// do nothing new version lock is already created in the code beneath
+		}
+		if (versionFromDb == null)
+			versionLock = new VersionLock(WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY);
 		else
-			return false;
+			versionLock.setVersion(versionFromDb.getVersion());
+		entityManager.persist(versionLock);
+		entityManager.flush();
+		return false;
 	}
 
-	private void aquireWriteVersionLock() {
-		// aquire write lock for version and release it after update with a new version
-		// in it
-		VersionLock currentVersionLock = entityManager.find(VersionLock.class,
-				WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY, LockModeType.PESSIMISTIC_WRITE);
-		if (currentVersionLock == null) {
-			currentVersionLock = new VersionLock();
-			currentVersionLock.setLocktype(WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY);
-			entityManager.persist(currentVersionLock);
-			currentVersionLock = entityManager.find(VersionLock.class, WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY,
-					LockModeType.PESSIMISTIC_WRITE);
-		}
-		this.versionLock = currentVersionLock;
+	private VersionLock getFromDb(boolean lockwriteMode) {
+		VersionLock versionFromDb = entityManager.find(VersionLock.class,
+				WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY,
+				lockwriteMode ? LockModeType.PESSIMISTIC_WRITE : LockModeType.NONE);
+		return versionFromDb;
 	}
 
 	/**
@@ -378,10 +413,14 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 		Map<String, PropertyDefinition<?>> propertyDefinitionsMap = paramTypeDefinition.getPropertyDefinitions();
 		Set<String> propertyDefinitionKeys = propertyDefinitionsMap.keySet();
 		for (String propertyDefinitionKey : propertyDefinitionKeys) {
-			PropertyDefinition<?> savedRepoPropDef = getPropertyDefinition(propertyDefinitionKey);
-			if (savedRepoPropDef != null)
-				throw new CmisInvalidArgumentException("It is not allowed to redefine a property. The property "
-						+ propertyDefinitionKey + " is already defined!", PROPERTY_ALREADY_DEFINED);
+			// check property definition existance only for non base types because base
+			// types share their property definitions
+			if (!paramTypeDefinition.getBaseTypeId().value().equals(paramTypeDefinition.getId())) {
+				PropertyDefinition<?> savedRepoPropDef = getPropertyDefinition(propertyDefinitionKey);
+				if (savedRepoPropDef != null)
+					throw new CmisInvalidArgumentException("It is not allowed to redefine a property. The property "
+							+ propertyDefinitionKey + " is already defined!", PROPERTY_ALREADY_DEFINED);
+			}
 		}
 	}
 
@@ -397,8 +436,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Lock(LockType.WRITE)
 	public void updateTypeDefinition(TypeDefinition paramTypeDefinition) {
-		checkAndRenewTypeDefinitions();
-		aquireWriteVersionLock();
+		checkAndRenewTypeDefinitions(true);
 		if (paramTypeDefinition == null)
 			throw new CmisInvalidArgumentException("Empty type not allowed.", TYPE_EMPTY_NOT_ALLOWED);
 		TypeBase origValue = typedefinitions.get(paramTypeDefinition.getId());
@@ -438,7 +476,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 			}
 			origType.updateTypeAttributes(secondaryTypeDefinition);
 		}
-		structureManager.updateDatabaseStructure(origValue,true);
+		structureManager.updateDatabaseStructure(origValue, true);
 		entityManager.persist(origValue);
 	}
 
@@ -454,8 +492,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Lock(LockType.WRITE)
 	public void deleteTypeDefinition(String paramTypeId) {
-		checkAndRenewTypeDefinitions();
-		aquireWriteVersionLock();
+		checkAndRenewTypeDefinitions(true);
 		TypeBase repoValue = typedefinitions.get(paramTypeId);
 		if (repoValue == null)
 			throw new CmisInvalidArgumentException("The type to remove does not exist.", TYPE_DOES_NOT_EXIST);
@@ -473,13 +510,14 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 		typedefinitions.remove(paramTypeId);
 	}
 
-
-
-	private void checkAndRenewTypeDefinitions() {
-		if(checkVersionLockRenewed())
-		{
+	private void checkAndRenewTypeDefinitions(boolean lockWriteMode) {
+		if (checkVersionLockRenewed(lockWriteMode)) {
 			reReadTypesMap();
 			structureManager.reReadModel();
+			synchronized (versionLock) {
+				VersionLock versionLockFromDB = getFromDb(lockWriteMode);
+				versionLock.setVersion(versionLockFromDB.getVersion());
+			}
 		}
 	}
 
@@ -529,9 +567,15 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	 */
 	@Override
 	@Transactional()
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Lock(LockType.READ)
 	public PropertyDefinition<?> getPropertyDefinition(String paramPropertyId) {
-		return entityManager.find(PropertyDefinitionBase.class, paramPropertyId);
+		checkVersionLockRenewed(false);
+		PropertyDefinition<?> propDef = propertydefinitions.get(paramPropertyId);
+		if (propDef != null) {
+			return typeDefinitionFactory.copy(propDef);
+		}
+		return null;
 	}
 
 	/**
@@ -558,6 +602,8 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 		typeDefinitionFactory.setDefaultQueryable(false);
 		typeDefinitionFactory.setDefaultFulltextIndexed(false);
 		typeDefinitionFactory.setDefaultTypeMutability(typeDefinitionFactory.createTypeMutability(true, false, false));
+		// be sure version lock is set in database and bean
+		checkVersionLockRenewed(false);
 		// request all root types - if they are not defined so far they will get
 		// initialized right now by the WidaTypeMetaDataServiceImpl
 		getRootTypes();
@@ -587,7 +633,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Lock(LockType.READ)
 	public Map<String, TypeDefinition> getTypeDefinitionMap() {
-		checkAndRenewTypeDefinitions();
+		checkAndRenewTypeDefinitions(false);
 		Map<String, TypeDefinition> resultMap = new HashMap<>();
 		resultMap.putAll(typedefinitions);
 		return resultMap;
@@ -598,7 +644,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Lock(LockType.READ)
 	public TypeBase getInternalTypeDefinition(String paramTypeId) {
-		checkAndRenewTypeDefinitions();
+		checkAndRenewTypeDefinitions(false);
 		return typedefinitions.get(paramTypeId);
 	}
 }
