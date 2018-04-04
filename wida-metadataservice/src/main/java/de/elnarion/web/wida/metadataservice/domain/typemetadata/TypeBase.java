@@ -846,13 +846,11 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	/**
 	 * Gets the parent.
 	 *
-	 * @param <T>
-	 *            the generic type
 	 * @return TypeBase - the parent
 	 */
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "parent_id", insertable = false, updatable = false)
-	public abstract <T extends TypeBase> T getParent();
+	public abstract TypeBase getParent();
 
 	/**
 	 * Sets the parent.
@@ -877,7 +875,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	private List<PropertyDefinitionBase<?>> getPropertyDefinitionsListWithInherited() {
 		List<PropertyDefinitionBase<?>> completeList = new ArrayList<>();
 		completeList.addAll(propertyDefinitionsList);
-		if (isInheritProperties()) {
+		if (isInheritProperties()&&getParent()!=null) {
 			List<PropertyDefinitionBase<?>> parentList = getParent()
 					.getPropertyDefinitionsListWithInherited();
 			completeList.addAll(parentList);

@@ -80,7 +80,6 @@ public class TypeFolder extends TypeBase implements MutableFolderTypeDefinition 
 	 *
 	 * @return TypeBase - the parent
 	 */
-	@SuppressWarnings("unchecked")
 	public TypeFolder getParent() {
 		return parent;
 	}

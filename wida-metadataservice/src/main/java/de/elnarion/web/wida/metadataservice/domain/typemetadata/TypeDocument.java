@@ -153,7 +153,6 @@ public class TypeDocument extends TypeBase implements MutableDocumentTypeDefinit
 	 *
 	 * @return TypeBase - the parent
 	 */
-	@SuppressWarnings("unchecked")
 	public TypeDocument getParent() {
 		return parent;
 	}

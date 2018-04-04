@@ -68,6 +68,7 @@ public class TypeSecondary extends TypeBase implements MutableSecondaryTypeDefin
 	public TypeSecondary(SecondaryTypeDefinition paramSecondaryTypeDefinition)
 	{
 		super(paramSecondaryTypeDefinition);
+		init();
 	}
 
 	private void init() {
@@ -79,7 +80,6 @@ public class TypeSecondary extends TypeBase implements MutableSecondaryTypeDefin
 	 *
 	 * @return TypeBase - the parent
 	 */
-	@SuppressWarnings("unchecked")
 	public TypeSecondary getParent() {
 		return parent;
 	}
