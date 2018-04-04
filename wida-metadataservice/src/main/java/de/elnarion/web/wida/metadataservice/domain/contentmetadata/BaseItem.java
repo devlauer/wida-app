@@ -322,7 +322,7 @@ public abstract class BaseItem {
 	 * @return Set - the secondary type ids
 	 */
 	@ElementCollection
-	@CollectionTable(schema = "wida", name = "cm_item_secondary_types", joinColumns = @JoinColumn(name = "item_id"))
+	@CollectionTable(schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, name = WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_secondary_types", joinColumns = @JoinColumn(name = "item_id"))
 	@Column(name = "secondary_type_id")
 	public Set<String> getSecondaryTypeIds() {
 		return secondaryTypeIds;

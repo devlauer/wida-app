@@ -77,7 +77,7 @@ public class PropertyDefinitionBoolean extends PropertyDefinitionBase<Boolean>
 
 	@Override
 	@ElementCollection
-	@CollectionTable(schema = "wida", name = "prop_def_boolean_default", joinColumns = @JoinColumn(name = "prop_def_id"))
+	@CollectionTable(schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE +"_boolean_default", joinColumns = @JoinColumn(name = "prop_def_id"))
 	@Column(name = "default_value")
 	public List<Boolean> getDefaultValue() {
 		return super.getDefaultValue();
