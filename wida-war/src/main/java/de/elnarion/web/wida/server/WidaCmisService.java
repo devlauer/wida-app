@@ -280,7 +280,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 			ContentStream contentStream, VersioningState versioningState, List<String> policies, Acl addAces,
 			Acl removeAces, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		return objectService.createDocument(properties, folderId, contentStream, versioningState, policies, addAces,
+		return objectService.createDocument(context.getUsername(),properties, folderId, contentStream, versioningState, policies, addAces,
 				removeAces);
 	}
 
@@ -292,7 +292,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 			VersioningState versioningState, List<String> policies, Acl addAces, Acl removeAces,
 			ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		return objectService.createDocumentFromSource(sourceId, properties, folderId, versioningState, policies,
+		return objectService.createDocumentFromSource(context.getUsername(),sourceId, properties, folderId, versioningState, policies,
 				addAces, removeAces);
 	}
 
@@ -303,7 +303,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public String createFolder(String repositoryId, Properties properties, String folderId, List<String> policies,
 			Acl addAces, Acl removeAces, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		return objectService.createFolder(properties, folderId, policies, addAces, removeAces);
+		return objectService.createFolder(context.getUsername(),properties, folderId, policies, addAces, removeAces);
 	}
 
 	/* (non-Javadoc)
@@ -313,7 +313,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public String createRelationship(String repositoryId, Properties properties, List<String> policies, Acl addAces,
 			Acl removeAces, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		return objectService.createRelationship(properties, policies, addAces, removeAces);
+		return objectService.createRelationship(context.getUsername(),properties, policies, addAces, removeAces);
 	}
 
 	/* (non-Javadoc)
@@ -323,7 +323,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public String createPolicy(String repositoryId, Properties properties, String folderId, List<String> policies,
 			Acl addAces, Acl removeAces, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		return objectService.createPolicy(properties, folderId, policies, addAces, removeAces);
+		return objectService.createPolicy(context.getUsername(),properties, folderId, policies, addAces, removeAces);
 	}
 
 	/* (non-Javadoc)
@@ -333,7 +333,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public String createItem(String repositoryId, Properties properties, String folderId, List<String> policies,
 			Acl addAces, Acl removeAces, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		return objectService.createItem(properties, folderId, policies, addAces, removeAces);
+		return objectService.createItem(context.getUsername(),properties, folderId, policies, addAces, removeAces);
 	}
 
 	/* (non-Javadoc)
@@ -412,7 +412,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public void updateProperties(String repositoryId, Holder<String> objectId, Holder<String> changeToken,
 			Properties properties, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		objectService.updateProperties(objectId, changeToken, properties);
+		objectService.updateProperties(context.getUsername(),objectId, changeToken, properties);
 	}
 
 	/* (non-Javadoc)
@@ -423,7 +423,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 			List<BulkUpdateObjectIdAndChangeToken> objectIdAndChangeToken, Properties properties,
 			List<String> addSecondaryTypeIds, List<String> removeSecondaryTypeIds, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		return objectService.bulkUpdateProperties(objectIdAndChangeToken, properties, addSecondaryTypeIds,
+		return objectService.bulkUpdateProperties(context.getUsername(),objectIdAndChangeToken, properties, addSecondaryTypeIds,
 				removeSecondaryTypeIds);
 	}
 
@@ -434,7 +434,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public void moveObject(String repositoryId, Holder<String> objectId, String targetFolderId, String sourceFolderId,
 			ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		objectService.moveObject(objectId, targetFolderId, sourceFolderId);
+		objectService.moveObject(context.getUsername(),objectId, targetFolderId, sourceFolderId);
 	}
 
 	/* (non-Javadoc)
@@ -443,7 +443,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	@Override
 	public void deleteObject(String repositoryId, String objectId, Boolean allVersions, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		objectService.deleteObject(objectId, allVersions);
+		objectService.deleteObject(context.getUsername(),objectId, allVersions);
 	}
 	
 
@@ -454,7 +454,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public FailedToDeleteData deleteTree(String repositoryId, String folderId, Boolean allVersions,
 			UnfileObject unfileObjects, Boolean continueOnFailure, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		return objectService.deleteTree(folderId, allVersions, unfileObjects, continueOnFailure);
+		return objectService.deleteTree(context.getUsername(),folderId, allVersions, unfileObjects, continueOnFailure);
 	}
 
 	/* (non-Javadoc)
@@ -464,7 +464,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public void setContentStream(String repositoryId, Holder<String> objectId, Boolean overwriteFlag,
 			Holder<String> changeToken, ContentStream contentStream, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		objectService.setContentStream(objectId, overwriteFlag, changeToken, contentStream);
+		objectService.setContentStream(context.getUsername(),objectId, overwriteFlag, changeToken, contentStream);
 	}
 
 	/* (non-Javadoc)
@@ -474,7 +474,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public void appendContentStream(String repositoryId, Holder<String> objectId, Holder<String> changeToken,
 			ContentStream contentStream, boolean isLastChunk, ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		objectService.appendContentStream(objectId, changeToken, contentStream, isLastChunk);
+		objectService.appendContentStream(context.getUsername(),objectId, changeToken, contentStream, isLastChunk);
 	}
 
 	/* (non-Javadoc)
@@ -484,7 +484,7 @@ public class WidaCmisService extends AbstractCmisService implements CallContextA
 	public void deleteContentStream(String repositoryId, Holder<String> objectId, Holder<String> changeToken,
 			ExtensionsData extension) {
 		// ignore repositoryId because only one repository is supported; ignore extension because not used
-		objectService.deleteContentStream(objectId, changeToken);
+		objectService.deleteContentStream(context.getUsername(),objectId, changeToken);
 	}
 
 	// -- multi filing services -- not supported!!
