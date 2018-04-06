@@ -15,8 +15,10 @@
  ******************************************************************************/
 package de.elnarion.web.wida.metadataservice.impl;
 
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,14 +36,26 @@ import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 
+import org.apache.chemistry.opencmis.commons.data.Properties;
+import org.apache.chemistry.opencmis.commons.data.PropertyData;
+import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
+import org.apache.chemistry.opencmis.commons.enums.Cardinality;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
+import org.apache.chemistry.opencmis.server.support.TypeValidator;
+
 import de.elnarion.web.wida.common.WidaConstants;
 import de.elnarion.web.wida.common.WidaErrorConstants;
 import de.elnarion.web.wida.metadataservice.WidaContentMetaDataService;
 import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
 import de.elnarion.web.wida.metadataservice.WidaTypeMetaDataService;
+import de.elnarion.web.wida.metadataservice.domain.contentmetadata.BaseItem;
+import de.elnarion.web.wida.metadataservice.domain.contentmetadata.Document;
+import de.elnarion.web.wida.metadataservice.domain.contentmetadata.Document_;
 import de.elnarion.web.wida.metadataservice.domain.contentmetadata.Folder;
 import de.elnarion.web.wida.metadataservice.domain.contentmetadata.Folder_;
+import de.elnarion.web.wida.metadataservice.domain.typemetadata.PropertyDefinitionBase;
 import de.elnarion.web.wida.metadataservice.domain.typemetadata.TypeBase;
+import de.elnarion.web.wida.metadataservice.domain.typemetadata.TypeDocument;
 
 /**
  * The Class WidaContentMetadataServiceImpl.
@@ -63,11 +77,11 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 	/** The entity manager. */
 	@PersistenceContext(unitName = "wida_ctx")
 	private EntityManager entityManager;
-	
+
 	/** The structure manager. */
 	@EJB
 	private WidaContentMetaDataStructureManager structureManager;
-	
+
 	/** The type service. */
 	@EJB
 	private WidaTypeMetaDataService typeService;
@@ -106,20 +120,16 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 		Root<Folder> rootCriteria = query.from(Folder.class);
 		query.where(cb.equal(rootCriteria.get(Folder_.objectId), paramObjectId));
 		Folder folder = null;
-		try
-		{
+		try {
 			folder = entityManager.createQuery(query).getSingleResult();
-		}
-		catch(NoResultException e)
-		{
+		} catch (NoResultException e) {
 			return null;
 		}
-		if(folder.getBaseTypeId()!=folder.getObjectTypeId())
-		{
+		if (folder.getBaseTypeId() != folder.getObjectTypeId()) {
 			String objectTypeId = folder.getObjectTypeId();
 			Long objectId = folder.getId();
 			Set<String> secondaryIds = folder.getSecondaryTypeIds();
-			folder.setProperties(getNonBaseTypeProperties(objectId, objectTypeId,secondaryIds));
+			folder.setProperties(getNonBaseTypeProperties(objectId, objectTypeId, secondaryIds));
 		}
 		return folder;
 	}
@@ -128,15 +138,14 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 		TypeBase type = typeService.getInternalTypeDefinition(objectTypeId);
 		Map<String, Object> resultProperties = new HashMap<>();
 		Map<String, Object> typeProperties = structureManager.fetchPropertiesForId(type, objectId);
-		if(typeProperties!=null)
+		if (typeProperties != null)
 			resultProperties.putAll(typeProperties);
-		if(secondaryIds!=null)
-		{
-			for(String secondaryObjectTypeId : secondaryIds)
-			{
+		if (secondaryIds != null) {
+			for (String secondaryObjectTypeId : secondaryIds) {
 				TypeBase secondaryType = typeService.getInternalTypeDefinition(secondaryObjectTypeId);
-				Map<String, Object> secondaryTypeProperties = structureManager.fetchPropertiesForId(secondaryType, objectId);
-				if(secondaryTypeProperties!=null)
+				Map<String, Object> secondaryTypeProperties = structureManager.fetchPropertiesForId(secondaryType,
+						objectId);
+				if (secondaryTypeProperties != null)
 					resultProperties.putAll(typeProperties);
 			}
 		}
@@ -239,6 +248,112 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 	 */
 	public void setTypeService(WidaTypeMetaDataService typeService) {
 		this.typeService = typeService;
+	}
+
+	@Override
+	@Transactional
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public String createDocument(Document document, Properties properties) {
+		return createBaseItem(document, properties);
+	}
+
+	private String createBaseItem(BaseItem baseItem, Properties properties) {
+		Map<String, PropertyData<?>> propertyMap = properties.getProperties();
+		List<TypeBase> typeDefinitions = getAllTypeDefinitionsForBaseItem(baseItem, propertyMap);
+		List<TypeDefinition> cmisTypeDefinitions = new ArrayList<>();
+
+		Map<TypeBase, Map<String, Object>> typeToPropertyMapping = new HashMap<>();
+		for (TypeBase type : typeDefinitions) {
+			cmisTypeDefinitions.add(type);
+			List<PropertyDefinitionBase<?>> typePropertyDefinitions = type.getPropertyDefinitionsList();
+			Map<String, Object> propertyValues = new HashMap<>();
+			for (PropertyDefinitionBase<?> propertyDefinition : typePropertyDefinitions) {
+				PropertyData<?> propData = propertyMap.get(propertyDefinition.getId());
+				if ((propData == null || propData.getValues() == null || propData.getValues().size() < 1)
+						&& propertyDefinition.getDefaultValue() != null) {
+					if (propertyDefinition.getCardinality() == Cardinality.MULTI) {
+						propertyValues.put(propertyDefinition.getId(), propertyDefinition.getDefaultValue());
+					} else if (propertyDefinition.getCardinality() == Cardinality.SINGLE) {
+						propertyValues.put(propertyDefinition.getId(),
+								propertyDefinition.getDefaultValue().iterator().next());
+					}
+				} else if(propData!=null) {
+					if (propertyDefinition.getCardinality() == Cardinality.MULTI) {
+						propertyValues.put(propertyDefinition.getId(), propData.getValues());
+					} else if (propertyDefinition.getCardinality() == Cardinality.SINGLE) {
+						propertyValues.put(propertyDefinition.getId(), propData.getFirstValue());
+					}
+				}
+			}
+			typeToPropertyMapping.put(type, propertyValues);
+		}
+		TypeValidator.validateProperties(cmisTypeDefinitions, properties, true);
+		entityManager.persist(baseItem);
+		entityManager.flush();
+		structureManager.insertProperties(baseItem.getId(),typeToPropertyMapping);
+		return baseItem.getObjectId();
+	}
+
+	private void addAllInheritedTypes(TypeBase objectType, List<TypeBase> typeDefinitions) {
+		if (!objectType.getId().equals(objectType.getBaseTypeId().value())) {
+			typeDefinitions.add(objectType);
+			addAllInheritedTypes(objectType.getParent(), typeDefinitions);
+		}
+	}
+
+	private List<TypeBase> getAllTypeDefinitionsForBaseItem(BaseItem baseItem,
+			Map<String, PropertyData<?>> propertyMap) {
+		List<TypeBase> typeDefinitions = new ArrayList<>();
+		TypeBase objectType = typeService.getInternalTypeDefinition(baseItem.getObjectTypeId());
+		if (objectType == null)
+			throw new CmisConstraintException("The objectTypeId " + baseItem.getObjectTypeId() + " is unkown.",	WidaErrorConstants.CONSTRAINT_OBJECT_TYPE_UNKOWN);
+		if(!(objectType instanceof TypeDocument))
+			throw new CmisConstraintException("The objectTypeId "+baseItem.getObjectTypeId()+" is no document type. Please use another one.",WidaErrorConstants.CONSTRAINT_INVALID_TYPE_ID);
+		TypeValidator.validateContentAllowed((TypeDocument)objectType, true);
+
+		addAllInheritedTypes(objectType, typeDefinitions);
+
+		if (baseItem.getSecondaryTypeIds() != null) {
+			Set<String> secondarySet = baseItem.getSecondaryTypeIds();
+			for (String secondaryTypeId : secondarySet) {
+				TypeBase secondaryType = typeService.getInternalTypeDefinition(secondaryTypeId);
+				if (secondaryType == null)
+					throw new CmisConstraintException("The objectTypeId " + secondaryTypeId + " is unkown.",
+							WidaErrorConstants.CONSTRAINT_OBJECT_TYPE_UNKOWN);
+				addAllInheritedTypes(secondaryType, typeDefinitions);
+			}
+		}
+		return typeDefinitions;
+	}
+
+	@Override
+	@Transactional
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public Document getDocument(String sourceId) {
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Document> query = cb.createQuery(Document.class);
+		Root<Document> rootCriteria = query.from(Document.class);
+		query.where(cb.equal(rootCriteria.get(Document_.objectId), sourceId));
+		Document document = null;
+		try {
+			document = entityManager.createQuery(query).getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
+		if (document.getBaseTypeId() != document.getObjectTypeId()) {
+			String objectTypeId = document.getObjectTypeId();
+			Long objectId = document.getId();
+			Set<String> secondaryIds = document.getSecondaryTypeIds();
+			document.setProperties(getNonBaseTypeProperties(objectId, objectTypeId, secondaryIds));
+		}
+		return document;
+	}
+
+	@Override
+	@Transactional
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)	
+	public String createFolder(Folder folder, Properties properties) {
+		return createBaseItem(folder, properties);
 	}
 
 }

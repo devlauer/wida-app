@@ -160,8 +160,14 @@ public interface WidaErrorConstants {
 
 	/** The Constant INVALID_ARGUMENT_EMPTY. */
 	public static final BigInteger INVALID_ARGUMENT_EMPTY = new BigInteger("4001");
-	
-	
+
+	/** The Constant INVALID_ARGUMENT_MISSING_FILENAME_FOR_CONTENT_STREAM. */
+	public static final BigInteger INVALID_ARGUMENT_MISSING_FILENAME_FOR_CONTENT_STREAM = new BigInteger("4002");
+
+	/** The Constant INVALID_ARGUMENT_MISSING_MIMETYPE_FOR_CONTENT_STREAM. */
+	public static final BigInteger INVALID_ARGUMENT_MISSING_MIMETYPE_FOR_CONTENT_STREAM = new BigInteger("4003");
+
+
 	// constraint exception codes
 	
 	/** The Constant INVALID_ARGUMENT_ID_TOO_BIG. */
@@ -178,7 +184,13 @@ public interface WidaErrorConstants {
 
 	/** The Constant CONSTRAINT_CREATE_CHILD_OF_IMMUTABLE_TYPE. */
 	public static final BigInteger CONSTRAINT_CREATE_CHILD_OF_IMMUTABLE_TYPE = new BigInteger("5004");
-	
+
+	/** The Constant CONSTRAINT_OBJECT_TYPE_UNKOWN. */
+	public static final BigInteger CONSTRAINT_OBJECT_TYPE_UNKOWN = new BigInteger("5005");
+
+	/** The Constant CONSTRAINT_INVALID_TYPE_ID. */
+	public static final BigInteger CONSTRAINT_INVALID_TYPE_ID = new BigInteger("5006");
+
 	
 	// runtime exception codes
 	
@@ -188,11 +200,16 @@ public interface WidaErrorConstants {
 	/** The Constant RUNTIME_EXCEPTION_WRONG_TYPE_FOR_UPDATE_USED. */
 	public static final BigInteger RUNTIME_EXCEPTION_WRONG_TYPE_FOR_UPDATE_USED = new BigInteger("6001");
 
+	/** The Constant RUNTIME_EXCEPTION_STORAGE_WRITE_EXCEPTION. */
+	public static final BigInteger RUNTIME_EXCEPTION_STORAGE_WRITE_EXCEPTION = new BigInteger("6002");
+	
 	
 	// not found exception codes
 	
 	/** The Constant NOT_FOUND_OBJECT. */
 	public static final BigInteger NOT_FOUND_OBJECT = new BigInteger("7000");
+
+	
 
 
 }

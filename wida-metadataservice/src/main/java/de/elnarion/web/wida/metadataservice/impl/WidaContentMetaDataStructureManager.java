@@ -18,6 +18,7 @@ package de.elnarion.web.wida.metadataservice.impl;
 import java.math.BigInteger;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,8 @@ import org.apache.commons.beanutils.DynaBean;
 
 import de.elnarion.ddlutils.Platform;
 import de.elnarion.ddlutils.PlatformFactory;
+import de.elnarion.ddlutils.dynabean.SqlDynaBean;
+import de.elnarion.ddlutils.dynabean.SqlDynaClass;
 import de.elnarion.ddlutils.model.CascadeActionEnum;
 import de.elnarion.ddlutils.model.CloneHelper;
 import de.elnarion.ddlutils.model.Column;
@@ -99,7 +102,7 @@ public class WidaContentMetaDataStructureManager {
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	public void updateDatabaseStructure(TypeBase paramTypeWithSubHierarchy, boolean ignoreTypeHierarchy) {
 		Database actualMetadata = databaseModel;
-		
+
 		CloneHelper cloneHelper = new CloneHelper();
 		Database desiredMetaData = cloneHelper.clone(actualMetadata);
 
@@ -112,14 +115,12 @@ public class WidaContentMetaDataStructureManager {
 				if (children != null && children.size() > 0) {
 					updateModel(children, desiredMetaData);
 				}
-			}
-			else
-			{
+			} else {
 				// nothing to do return no childs to process and no base type to process
 				return;
 			}
 		} else {
-			updateModel(paramTypeWithSubHierarchy, desiredMetaData,ignoreTypeHierarchy);
+			updateModel(paramTypeWithSubHierarchy, desiredMetaData, ignoreTypeHierarchy);
 		}
 		platform.alterModel(actualMetadata, desiredMetaData, false);
 		reReadModel();
@@ -389,7 +390,6 @@ public class WidaContentMetaDataStructureManager {
 		this.widaDatasource = widaDatasource;
 	}
 
-
 	/**
 	 * Fetch properties for id.
 	 *
@@ -528,6 +528,58 @@ public class WidaContentMetaDataStructureManager {
 	public void init() {
 		platform = PlatformFactory.createNewPlatformInstance(getWidaDatasource());
 		reReadModel();
+	}
+
+	/**
+	 * Insert properties.
+	 *
+	 * @param id
+	 *            the id
+	 * @param typeToPropertyMapping
+	 *            the type to property mapping
+	 */
+	@Transactional
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public void insertProperties(Long id, Map<TypeBase, Map<String, Object>> typeToPropertyMapping) {
+		Set<TypeBase> types = typeToPropertyMapping.keySet();
+		List<DynaBean> dynaBeans = new ArrayList<>();
+		for (TypeBase type : types) {
+			Table typeTable = databaseModel.findTable(type.getTablename());
+			SqlDynaClass dynaClass = SqlDynaClass.newInstance(typeTable);
+			DynaBean tableDynaBean = new SqlDynaBean(dynaClass);
+			tableDynaBean.set("id", id);
+			Map<String, Object> propertyValues = typeToPropertyMapping.get(type);
+			Set<String> propertyKeys = propertyValues.keySet();
+			List<PropertyDefinitionBase<?>> propertyDefinitions = type.getPropertyDefinitionsList();
+			for (String propertyKey : propertyKeys) {
+				for (PropertyDefinitionBase<?> propertyDefinition : propertyDefinitions) {
+					if (propertyDefinition.getId().equals(propertyKey)) {
+
+						if (propertyDefinition.getCardinality() == Cardinality.MULTI) {
+							Table multiTable = databaseModel.findTable(createMultivalueTablename(propertyDefinition, type.getTablename()));
+							SqlDynaClass dynaMultiClass = SqlDynaClass.newInstance(multiTable);
+							Object values = propertyValues.get(propertyKey);
+							if(values !=null && values instanceof Collection<?>)
+							{
+								@SuppressWarnings("unchecked")
+								Collection<Object> valuesCollection = ((Collection<Object>)values);
+								for(Object value:valuesCollection)
+								{
+									DynaBean tableMultiDynaBean = new SqlDynaBean(dynaMultiClass);
+									tableMultiDynaBean.set("parent_id", id);
+									tableMultiDynaBean.set(propertyDefinition.getColumnName(), value);
+									dynaBeans.add(tableMultiDynaBean);
+								}
+							}
+						} else {
+							tableDynaBean.set(propertyDefinition.getColumnName(), propertyValues.get(propertyKey));
+						}
+					}
+				}
+			}
+			dynaBeans.add(tableDynaBean);
+		}
+		platform.insert(databaseModel, dynaBeans);
 	}
 
 }

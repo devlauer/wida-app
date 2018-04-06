@@ -123,15 +123,6 @@ public abstract class BaseItem {
 		return objectId;
 	}
 
-	/**
-	 * Sets the object id.
-	 *
-	 * @param objectId
-	 *            the object id
-	 */
-	public void setId(String objectId) {
-		this.setObjectId(objectId);
-	}
 
 	/**
 	 * Gets the base type id.

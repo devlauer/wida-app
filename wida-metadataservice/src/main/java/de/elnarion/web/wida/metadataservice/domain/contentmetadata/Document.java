@@ -16,6 +16,10 @@
 package de.elnarion.web.wida.metadataservice.domain.contentmetadata;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -405,5 +409,41 @@ public class Document extends BaseItem {
 			contentStreamId = UUID.randomUUID().toString();
 	}
 	
-	
+
+	public Document clone() {
+		Document document = new Document();
+		document.setBaseTypeId(this.getBaseTypeId());
+		document.setCheckinComment(this.getCheckinComment());
+		document.setContentStreamFileName(this.getContentStreamFileName());
+		document.setContentStreamId(this.getContentStreamId());
+		document.setContentStreamLength(this.getContentStreamLength());
+		document.setContentStreamMimeType(this.getContentStreamMimeType());
+		document.setCreatedBy(this.getCreatedBy());
+		document.setCreationDate(this.getCreationDate());
+		document.setImmutable(this.isImmutable());
+		document.setLastMajorVersion(this.isLastMajorVersion());
+		document.setLastModificationDate(this.getLastModificationDate());
+		document.setLastModifiedBy(this.getLastModifiedBy());
+		document.setLastVersion(this.isLastVersion());
+		document.setMajorVersion(this.isMajorVersion());
+		document.setName(this.getName());
+		document.setObjectTypeId(this.getObjectTypeId());
+		document.setParent(this.getParent());
+		Map<String, Object> properties = new HashMap<>();
+		properties.putAll(this.getProperties());
+		document.setProperties(properties);
+		Set<String> secondaryTypeIds = new TreeSet<>();
+		secondaryTypeIds.addAll(this.getSecondaryTypeIds());
+		document.setSecondaryTypeIds(secondaryTypeIds);
+		document.setStorageId(this.getStorageId());
+		document.setVersionLabel(this.getVersionLabel());
+		document.setVersionSeriesCheckedOut(this.isVersionSeriesCheckedOut);
+		document.setVersionSeriesCheckedOutBy(this.getVersionSeriesCheckedOutBy());
+		document.setVersionSeriesCheckedOutId(this.getVersionSeriesCheckedOutId());
+		document.setVersionSeriesId(this.getVersionSeriesId());
+		document.setObjectId(this.getObjectId());
+		document.setId(this.getId());
+		return document;
+		
+	}
 }

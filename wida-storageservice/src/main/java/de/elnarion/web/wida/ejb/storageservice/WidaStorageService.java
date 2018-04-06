@@ -15,10 +15,26 @@
  ******************************************************************************/
 package de.elnarion.web.wida.ejb.storageservice;
 
+import java.io.InputStream;
+import java.math.BigInteger;
+
 /**
  * The Interface WidaContentService.
  */
 public interface WidaStorageService {
+
+	/**
+	 * Saves file the file to the configured storage path and return an storageid.
+	 *
+	 * @param stream
+	 *            the stream to save
+	 * @param size
+	 *            the size in bytes
+	 * @return the string the storageid
+	 * @throws WidaStorageServiceException
+	 *             the wida storage service exception
+	 */
+	String saveFile(InputStream stream,BigInteger size)throws WidaStorageServiceException;
 
 
 

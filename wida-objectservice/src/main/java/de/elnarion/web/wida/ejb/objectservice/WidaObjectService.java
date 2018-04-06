@@ -43,6 +43,8 @@ public interface WidaObjectService {
 	 * Creates a document object of the speciﬁed type (given by the
 	 * cmis:objectTypeId property) in the speciﬁed location.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param properties
 	 *            The property values that MUST be applied to the newly-created
 	 *            document object.
@@ -71,13 +73,15 @@ public interface WidaObjectService {
 	 *            or being ignored if no folderId is speciﬁed.
 	 * @return The id of the newly-created document.
 	 */
-	public String createDocument(Properties properties, String folderId, ContentStream contentStream,
+	public String createDocument(String userName,Properties properties, String folderId, ContentStream contentStream,
 			VersioningState versioningState, List<String> policies, Acl addAces, Acl removeAces);
 
 	/**
 	 * Creates a document object as a copy of the given source document in the
 	 * speciﬁed location.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param sourceId
 	 *            The identiﬁer for the source document.
 	 * @param properties
@@ -102,12 +106,14 @@ public interface WidaObjectService {
 	 *            or being ignored if no folderId is speciﬁed.
 	 * @return The id of the newly-created document.
 	 */
-	public String createDocumentFromSource(String sourceId, Properties properties, String folderId,
+	public String createDocumentFromSource(String userName,String sourceId, Properties properties, String folderId,
 			VersioningState versioningState, List<String> policies, Acl addAces, Acl removeAces);
 
 	/**
 	 * Creates a folder object of the speciﬁed type in the speciﬁed location.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param properties
 	 *            The property values that MUST be applied to the newly-created
 	 *            folder object.
@@ -127,12 +133,14 @@ public interface WidaObjectService {
 	 *            ignored if no folderId is speciﬁed.
 	 * @return The id of the newly-created folder.
 	 */
-	public String createFolder(Properties properties, String folderId, List<String> policies, Acl addAces,
+	public String createFolder(String userName,Properties properties, String folderId, List<String> policies, Acl addAces,
 			Acl removeAces);
 
 	/**
 	 * Creates a relationship object of the speciﬁed type.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param properties
 	 *            The property values that MUST be applied to the newly-created
 	 *            relationship object.
@@ -149,11 +157,13 @@ public interface WidaObjectService {
 	 *            speciﬁed, or being ignored if no folderId is speciﬁed.
 	 * @return The id of the newly-created relationship.
 	 */
-	public String createRelationship(Properties properties, List<String> policies, Acl addAces, Acl removeAces);
+	public String createRelationship(String userName,Properties properties, List<String> policies, Acl addAces, Acl removeAces);
 
 	/**
 	 * Creates a policy object of the speciﬁed type.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param properties
 	 *            The property values that MUST be applied to the newly-created
 	 *            policy object.
@@ -173,12 +183,14 @@ public interface WidaObjectService {
 	 *            speciﬁed, or being ignored if no folderId is speciﬁed.
 	 * @return The id of the newly-created policy.
 	 */
-	public String createPolicy(Properties properties, String folderId, List<String> policies, Acl addAces,
+	public String createPolicy(String userName,Properties properties, String folderId, List<String> policies, Acl addAces,
 			Acl removeAces);
 
 	/**
 	 * Creates an item object of the speciﬁed type.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param properties
 	 *            The property values that MUST be applied to the newly-created item
 	 *            object.
@@ -198,7 +210,7 @@ public interface WidaObjectService {
 	 *            speciﬁed, or being ignored if no folderId is speciﬁed.
 	 * @return The id of the newly-created item.
 	 */
-	public String createItem(Properties properties, String folderId, List<String> policies, Acl addAces,
+	public String createItem(String userName,Properties properties, String folderId, List<String> policies, Acl addAces,
 			Acl removeAces);
 
 	/**
@@ -300,6 +312,8 @@ public interface WidaObjectService {
 	/**
 	 * Updates properties and secondary types of the speciﬁed object.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param objectId
 	 *            The identiﬁer for the object.
 	 * @param changeToken
@@ -320,7 +334,7 @@ public interface WidaObjectService {
 	 * @param properties
 	 *            The updated property values that MUST be applied to the object.
 	 */
-	public void updateProperties(Holder<String> objectId, Holder<String> changeToken, Properties properties);
+	public void updateProperties(String userName,Holder<String> objectId, Holder<String> changeToken, Properties properties);
 
 	/**
 	 * Updates properties and secondary types of one or more objects. Only
@@ -331,6 +345,8 @@ public interface WidaObjectService {
 	 * update fails, the object id of this particular object MUST be omitted from
 	 * the result.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param objectIdAndChangeToken
 	 *            The identiﬁers of the objects to be updated and their change
 	 *            tokens. Invalid object ids, for example ids of objects that don’t
@@ -350,13 +366,15 @@ public interface WidaObjectService {
 	 *         been created. The new change token of the object. MUST be set if the
 	 *         repository supports change tokens.
 	 */
-	public List<BulkUpdateObjectIdAndChangeToken> bulkUpdateProperties(
+	public List<BulkUpdateObjectIdAndChangeToken> bulkUpdateProperties(String userName,
 			List<BulkUpdateObjectIdAndChangeToken> objectIdAndChangeToken, Properties properties,
 			List<String> addSecondaryTypeIds, List<String> removeSecondaryTypeIds);
 
 	/**
 	 * Moves the speciﬁed ﬁle-able object from one folder to another.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param objectId
 	 *            The identiﬁer for the object.
 	 * @param targetFolderId
@@ -364,11 +382,13 @@ public interface WidaObjectService {
 	 * @param sourceFolderId
 	 *            The folder from which the object is to be moved.
 	 */
-	public void moveObject(Holder<String> objectId, String targetFolderId, String sourceFolderId);
+	public void moveObject(String userName,Holder<String> objectId, String targetFolderId, String sourceFolderId);
 
 	/**
 	 * Deletes the speciﬁed object.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param objectId
 	 *            The identiﬁer for the object.
 	 * @param allVersions
@@ -378,7 +398,7 @@ public interface WidaObjectService {
 	 *            invoke on a non-document object or non-versionable document
 	 *            object.
 	 */
-	public void deleteObject(String objectId, Boolean allVersions);
+	public void deleteObject(String userName,String objectId, Boolean allVersions);
 
 	/**
 	 * Deletes the speciﬁed folder object and all of its child- and
@@ -392,6 +412,8 @@ public interface WidaObjectService {
 	 * or kept, never just unﬁled. This is so that a user can call this command
 	 * again to recover from the error by using the same tree.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param folderId
 	 *            The identiﬁer of the folder to be deleted.
 	 * @param allVersions
@@ -424,12 +446,14 @@ public interface WidaObjectService {
 	 * @return A list of identiﬁers of objects in the folder tree that were not
 	 *         deleted.
 	 */
-	public FailedToDeleteData deleteTree(String folderId, Boolean allVersions, UnfileObject unfileObjects,
+	public FailedToDeleteData deleteTree(String userName,String folderId, Boolean allVersions, UnfileObject unfileObjects,
 			Boolean continueOnFailure);
 
 	/**
 	 * Sets the content stream for the speciﬁed document object.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param objectId
 	 *            The identiﬁer for the document object.
 	 * @param overwriteFlag
@@ -458,12 +482,14 @@ public interface WidaObjectService {
 	 * @param contentStream
 	 *            The content stream
 	 */
-	public void setContentStream(Holder<String> objectId, Boolean overwriteFlag, Holder<String> changeToken,
+	public void setContentStream(String userName,Holder<String> objectId, Boolean overwriteFlag, Holder<String> changeToken,
 			ContentStream contentStream);
 
 	/**
 	 * Appends to the content stream for the speciﬁed document object.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param objectId
 	 *            The identiﬁer for the document object.
 	 * @param changeToken
@@ -496,12 +522,14 @@ public interface WidaObjectService {
 	 *            processing. For example, only if isLastChunk is TRUE the
 	 *            repsoitory could generate renditions of the content.
 	 */
-	public void appendContentStream(Holder<String> objectId, Holder<String> changeToken, ContentStream contentStream,
+	public void appendContentStream(String userName,Holder<String> objectId, Holder<String> changeToken, ContentStream contentStream,
 			boolean isLastChunk);
 
 	/**
 	 * Delete content stream.
 	 *
+	 * @param userName
+	 *            the user name
 	 * @param objectId
 	 *            The identiﬁer for the document object.
 	 * @param changeToken
@@ -520,6 +548,6 @@ public interface WidaObjectService {
 	 *            does NOT match the change token value for the object being
 	 *            updated.
 	 */
-	public void deleteContentStream(Holder<String> objectId, Holder<String> changeToken);
+	public void deleteContentStream(String userName,Holder<String> objectId, Holder<String> changeToken);
 
 }
