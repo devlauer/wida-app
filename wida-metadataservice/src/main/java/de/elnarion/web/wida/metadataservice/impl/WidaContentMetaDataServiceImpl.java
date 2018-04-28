@@ -277,7 +277,7 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 						propertyValues.put(propertyDefinition.getId(),
 								propertyDefinition.getDefaultValue().iterator().next());
 					}
-				} else if(propData!=null) {
+				} else if (propData != null) {
 					if (propertyDefinition.getCardinality() == Cardinality.MULTI) {
 						propertyValues.put(propertyDefinition.getId(), propData.getValues());
 					} else if (propertyDefinition.getCardinality() == Cardinality.SINGLE) {
@@ -290,14 +290,15 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 		TypeValidator.validateProperties(cmisTypeDefinitions, properties, true);
 		entityManager.persist(baseItem);
 		entityManager.flush();
-		structureManager.insertProperties(baseItem.getId(),typeToPropertyMapping);
+		structureManager.insertProperties(baseItem.getId(), typeToPropertyMapping);
 		return baseItem.getObjectId();
 	}
 
 	private void addAllInheritedTypes(TypeBase objectType, List<TypeBase> typeDefinitions) {
 		if (!objectType.getId().equals(objectType.getBaseTypeId().value())) {
 			typeDefinitions.add(objectType);
-			addAllInheritedTypes(objectType.getParent(), typeDefinitions);
+			if (objectType.getParent() != null)
+				addAllInheritedTypes(objectType.getParent(), typeDefinitions);
 		}
 	}
 
@@ -306,10 +307,13 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 		List<TypeBase> typeDefinitions = new ArrayList<>();
 		TypeBase objectType = typeService.getInternalTypeDefinition(baseItem.getObjectTypeId());
 		if (objectType == null)
-			throw new CmisConstraintException("The objectTypeId " + baseItem.getObjectTypeId() + " is unkown.",	WidaErrorConstants.CONSTRAINT_OBJECT_TYPE_UNKOWN);
-		if(!(objectType instanceof TypeDocument))
-			throw new CmisConstraintException("The objectTypeId "+baseItem.getObjectTypeId()+" is no document type. Please use another one.",WidaErrorConstants.CONSTRAINT_INVALID_TYPE_ID);
-		TypeValidator.validateContentAllowed((TypeDocument)objectType, true);
+			throw new CmisConstraintException("The objectTypeId " + baseItem.getObjectTypeId() + " is unkown.",
+					WidaErrorConstants.CONSTRAINT_OBJECT_TYPE_UNKOWN);
+		if (!(objectType instanceof TypeDocument))
+			throw new CmisConstraintException(
+					"The objectTypeId " + baseItem.getObjectTypeId() + " is no document type. Please use another one.",
+					WidaErrorConstants.CONSTRAINT_INVALID_TYPE_ID);
+		TypeValidator.validateContentAllowed((TypeDocument) objectType, true);
 
 		addAllInheritedTypes(objectType, typeDefinitions);
 
@@ -351,7 +355,7 @@ public class WidaContentMetaDataServiceImpl implements WidaContentMetaDataServic
 
 	@Override
 	@Transactional
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)	
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public String createFolder(Folder folder, Properties properties) {
 		return createBaseItem(folder, properties);
 	}

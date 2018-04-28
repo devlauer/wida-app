@@ -42,10 +42,10 @@ import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
 @Entity
 @DiscriminatorValue("string")
 @SecondaryTable(name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-		+ "_string", schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, pkJoinColumns = {
+		+ "_STRING", pkJoinColumns = {
 				@PrimaryKeyJoinColumn(name = WidaMetaDataConstants.METADATA_PK_PREFIX
 						+ WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-						+ "_string_id", referencedColumnName = "id") })
+						+ "_STRING_ID", referencedColumnName = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME) })
 public class PropertyDefinitionString extends PropertyDefinitionBase<String>
 		implements MutablePropertyStringDefinition {
 
@@ -84,7 +84,7 @@ public class PropertyDefinitionString extends PropertyDefinitionBase<String>
 	 *
 	 * @return BigInteger - the max length
 	 */
-	@Column(name = "max_length", table = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE + "_string")
+	@Column(name = "MAX_LENGTH", table = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE + "_STRING")
 	public BigInteger getMaxLength() {
 		return maxLength;
 	}
@@ -101,9 +101,9 @@ public class PropertyDefinitionString extends PropertyDefinitionBase<String>
 
 	@Override
 	@ElementCollection
-	@CollectionTable(schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-			+ "_string_default", joinColumns = @JoinColumn(name = "prop_def_id"))
-	@Column(name = "default_value")
+	@CollectionTable( name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
+			+ "_STRING_DEFAULT", joinColumns = @JoinColumn(name = "PROP_DEF_ID"))
+	@Column(name = "DEFAULT_VALUE")
 	public List<String> getDefaultValue() {
 		return super.getDefaultValue();
 	}

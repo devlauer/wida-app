@@ -50,5 +50,6 @@ public class WidaTypeMetaDataServiceIntegrationTest extends WildflyTestServerSet
 	public final void testGetPropertyDefinition() {
 		typeService.getPropertyDefinition("cmis:objectTypeId");
 	}
+	
 
 }

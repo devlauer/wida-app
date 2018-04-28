@@ -45,10 +45,10 @@ import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
  */
 @Entity
 @DiscriminatorValue("type_document")
-@SecondaryTable(name = WidaMetaDataConstants.METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE, schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, pkJoinColumns = {
+@SecondaryTable(name = WidaMetaDataConstants.METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE,  pkJoinColumns = {
 		@PrimaryKeyJoinColumn(name = WidaMetaDataConstants.METADATA_PK_PREFIX
 				+ WidaMetaDataConstants.METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE
-				+ "_id", referencedColumnName = "id") })
+				+ "_ID", referencedColumnName = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME) })
 public class TypeDocument extends TypeBase implements MutableDocumentTypeDefinition {
 
 	/** The Constant serialVersionUID. */
@@ -102,7 +102,7 @@ public class TypeDocument extends TypeBase implements MutableDocumentTypeDefinit
 	 *
 	 * @return Boolean - the versionable
 	 */
-	@Column(name = "versionable", table = WidaMetaDataConstants.METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE, nullable = false)
+	@Column(name = "VERSIONABLE", table = WidaMetaDataConstants.METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE, nullable = false)
 	public Boolean isVersionable() {
 		return versionable;
 	}
@@ -132,7 +132,7 @@ public class TypeDocument extends TypeBase implements MutableDocumentTypeDefinit
 	 *
 	 * @return ContentStreamAllowed - the content stream allowed
 	 */
-	@Column(name = "contentstream_allowed", table = WidaMetaDataConstants.METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE, nullable = false)
+	@Column(name = "CONTENTSTREAM_ALLOWED", table = WidaMetaDataConstants.METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE, nullable = false)
 	@Enumerated(EnumType.STRING)
 	public ContentStreamAllowed getContentStreamAllowed() {
 		return contentStreamAllowed;

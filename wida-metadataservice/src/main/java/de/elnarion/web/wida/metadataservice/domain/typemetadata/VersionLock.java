@@ -11,7 +11,7 @@ import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
  * This class is used to sync the different structure models in a cluster.
  */
 @Entity
-@Table(name = WidaMetaDataConstants.METADATA_TYPE_VERSION_LOCK_TABLE, schema = WidaMetaDataConstants.METADATA_DB_SCHEMA)
+@Table(name = WidaMetaDataConstants.METADATA_TYPE_VERSION_LOCK_TABLE)
 public class VersionLock {
 
 	/** The locktype. */
@@ -43,7 +43,7 @@ public class VersionLock {
 	 * @return String - the locktype
 	 */
 	@Id
-	@Column(name="locktype",length=30)
+	@Column(name="LOCKTYPE",length=30)
 	public String getLocktype() {
 		return locktype;
 	}
@@ -63,7 +63,7 @@ public class VersionLock {
 	 *
 	 * @return Long - the version
 	 */
-	@Column(name="version")
+	@Column(name="VERSION")
 	public Long getVersion() {
 		return version;
 	}

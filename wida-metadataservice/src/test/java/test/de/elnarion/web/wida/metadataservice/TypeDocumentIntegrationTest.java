@@ -62,7 +62,7 @@ public class TypeDocumentIntegrationTest extends WildflyTestServerSetup {
 	@Inject
 	private UserTransaction userTransaction;
 	
-	private final static String ID="cmis:document";
+	private final static String ID="asdf:document";
 	
 	/**
 	 * Tests the creation and persisting of this object.
@@ -84,39 +84,39 @@ public class TypeDocumentIntegrationTest extends WildflyTestServerSetup {
 		PropertyDefinitionId idDefinition = new PropertyDefinitionId();
 		idDefinition.setCardinality(Cardinality.SINGLE);
 		idDefinition.setChoices(null);
-		idDefinition.setColumnName("id");
+		idDefinition.setColumnName("IDX");
 		List<String> defaultValuesId = new ArrayList<>();
 		defaultValuesId.add("default1");
 		defaultValuesId.add("default2");
 		idDefinition.setDefaultValue(defaultValuesId);
 		idDefinition.setDescription("propdef description");
 		idDefinition.setDisplayName("displayname");
-		idDefinition.setId("id");
-		idDefinition.setLocalName("id");
+		idDefinition.setId("idx");
+		idDefinition.setLocalName("idx");
 		idDefinition.setLocalNamespace("some namespace");
 		idDefinition.setOpenChoice(true);
 		idDefinition.setOrderable(false);
 		idDefinition.setQueryable(true);
-		idDefinition.setQueryName("id");
+		idDefinition.setQueryName("idx");
 		idDefinition.setRequired(true);
 		idDefinition.setUpdatability(Updatability.ONCREATE);
 		propertyDefinitionList.add(idDefinition);
 		PropertyDefinitionInteger integerDefinition = new PropertyDefinitionInteger();
 		integerDefinition.setCardinality(Cardinality.SINGLE);
 		integerDefinition.setChoices(null);
-		integerDefinition.setColumnName("id");
+		integerDefinition.setColumnName("INTEGERX");
 		List<BigInteger> defaultValuesInteger = new ArrayList<>();
 		defaultValuesInteger.add(new BigInteger("1"));
 		integerDefinition.setDefaultValue(defaultValuesInteger);
 		integerDefinition.setDescription("propdef description");
 		integerDefinition.setDisplayName("displayname");
-		integerDefinition.setId("integer");
-		integerDefinition.setLocalName("integer");
+		integerDefinition.setId("integerx");
+		integerDefinition.setLocalName("integerx");
 		integerDefinition.setLocalNamespace("some namespace");
 		integerDefinition.setOpenChoice(true);
 		integerDefinition.setOrderable(false);
 		integerDefinition.setQueryable(true);
-		integerDefinition.setQueryName("integer");
+		integerDefinition.setQueryName("integerx");
 		integerDefinition.setRequired(true);
 		integerDefinition.setUpdatability(Updatability.ONCREATE);
 		propertyDefinitionList.add(integerDefinition);
@@ -139,7 +139,7 @@ public class TypeDocumentIntegrationTest extends WildflyTestServerSetup {
 		documentType.setQueryable(true);
 		documentType.setQueryName(ID);
 		documentType.setSecondaryTypes(new TreeSet<>());
-		documentType.setTablename("tablename");
+		documentType.setTablename("TABLENAME");
 		documentType.setTypeMutabilityCreate(true);
 		documentType.setTypeMutabilityUpdate(true);
 		documentType.setTypeMutabiltiyDelete(true);
@@ -173,7 +173,7 @@ public class TypeDocumentIntegrationTest extends WildflyTestServerSetup {
 		PropertyDefinitionBase<?> propDef1 = it.next();
 		PropertyDefinitionBase<?> propDef2 = it.next();
 		documentType.removePropertyDefinition(propDef2.getId());
-		propDef1.setColumnName("new columnname");
+		propDef1.setColumnName("NEW_COLUMNNAME");
 		documentType.setLocalName("new localname");
 		entityManager.persist(documentType);
 		userTransaction.commit();

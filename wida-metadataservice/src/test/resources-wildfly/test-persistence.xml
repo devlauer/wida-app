@@ -27,7 +27,6 @@
 			<property name="hibernate.format_sql" value="true" />
 			<property
 				name="hibernate.transaction.flush_before_completion" value="true" />
-			<property name="hibernate.default_schema" value="wida" />
 			<property
 				name="javax.persistence.schema-generation.database.action"
 				value="drop-and-create" />
@@ -35,17 +34,11 @@
 				name="javax.persistence.schema-generation.create-database-schemas"
 				value="true" />
 			<property
-				name="javax.persistence.schema-generation.create-script-source"
-				value="META-INF/sql/create_schema_wida.sql" />
-			<property
 				name="javax.persistence.schema-generation.create-source"
-				value="script-then-metadata" />
+				value="metadata" />
 			<property
 				name="javax.persistence.schema-generation.drop-source"
-				value="metadata-then-script" />
-			<property
-				name="javax.persistence.schema-generation.drop-script-source"
-				value="META-INF/sql/drop_schema_wida.sql" />
+				value="metadata" />
 		</properties>
 	</persistence-unit>
 </persistence>

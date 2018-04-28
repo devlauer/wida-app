@@ -156,7 +156,8 @@ public class WidaContentMetaDataStructureManager {
 			// table's id column
 			typeDefinitionTable = new Table();
 			typeDefinitionTable.setName(tableName);
-			typeDefinitionTable.setSchema(WidaMetaDataConstants.METADATA_DB_SCHEMA);
+			// the DDLUtils do not respect the schema set here, so it is better to set schema via datasource 
+			//typeDefinitionTable.setSchema(WidaMetaDataConstants.METADATA_DB_SCHEMA);
 			typeDefinitionTable.setDescription("Metadatatable for type definition " + typeDefinition.getDisplayName());
 			Column idColumn = createIdColumn();
 			idColumn.setDescription("This id column references the id column of the table cm_item");
@@ -166,7 +167,7 @@ public class WidaContentMetaDataStructureManager {
 				throw new CmisRuntimeException(
 						"Content item table is not found in the database! Something went wrong. Please check startup of the repository for errors or the db for table existance.",
 						WidaErrorConstants.RUNTIME_EXCEPTION_CONTENT_TABLE_MISSING);
-			Column contentItemTableIdColumn = contentItemTable.findColumn("id");
+			Column contentItemTableIdColumn = contentItemTable.findColumn(WidaMetaDataConstants.METADATA_ID_COLUMN_NAME);
 			ForeignKey foreignKey = createForeignKey(tableName, idColumn, contentItemTable, contentItemTableIdColumn);
 			typeDefinitionTable.addForeignKey(foreignKey);
 			desiredMetaData.addTable(typeDefinitionTable);
@@ -175,7 +176,7 @@ public class WidaContentMetaDataStructureManager {
 		for (PropertyDefinitionBase<?> propertyDefinition : properties) {
 			// ignore inherited property defintions because they are already defined in the
 			// parent types
-			if (propertyDefinition.isInherited())
+			if (propertyDefinition.isInherited()!=null&&propertyDefinition.isInherited())
 				continue;
 			// single value properties can be part of the type definition table,
 			// multi-value properties have to have a separate metadata table
@@ -295,7 +296,7 @@ public class WidaContentMetaDataStructureManager {
 	 */
 	private Column createIdColumn() {
 		Column idColumn = new Column();
-		idColumn.setName("id");
+		idColumn.setName(WidaMetaDataConstants.METADATA_ID_COLUMN_NAME);
 		idColumn.setPrimaryKey(true);
 		idColumn.setRequired(true);
 		idColumn.setTypeCode(Types.INTEGER);
@@ -322,11 +323,12 @@ public class WidaContentMetaDataStructureManager {
 			// table id column
 			multivalueTable = new Table();
 			multivalueTable.setName(multivaluetablename);
-			multivalueTable.setSchema(WidaMetaDataConstants.METADATA_DB_SCHEMA);
+			// schema is not used by DDLUtils so miss it here
+			//multivalueTable.setSchema(WidaMetaDataConstants.METADATA_DB_SCHEMA);
 			multivalueTable.setDescription(
 					"Metadatatable for multi value property type definition " + propertyDefinition.getDisplayName());
 			Column vidColumn = new Column();
-			vidColumn.setName("vid");
+			vidColumn.setName("VID");
 			vidColumn.setPrimaryKey(true);
 			vidColumn.setRequired(true);
 			vidColumn.setTypeCode(Types.INTEGER);
@@ -334,7 +336,7 @@ public class WidaContentMetaDataStructureManager {
 			multivalueTable.addColumn(vidColumn);
 
 			Column tidColumn = new Column();
-			tidColumn.setName("parent_id");
+			tidColumn.setName("PARENT_ID");
 			tidColumn.setPrimaryKey(false);
 			tidColumn.setRequired(true);
 			tidColumn.setTypeCode(Types.INTEGER);
@@ -346,7 +348,7 @@ public class WidaContentMetaDataStructureManager {
 			tindexColumn.setColumn(tidColumn);
 
 			NonUniqueIndex tidIndex = new NonUniqueIndex();
-			tidIndex.setName(WidaMetaDataConstants.METADATA_INDEX_PREFIX + multivaluetablename + "_parent_id");
+			tidIndex.setName(WidaMetaDataConstants.METADATA_INDEX_PREFIX + multivaluetablename + "_PARENT_ID");
 			multivalueTable.addIndex(tidIndex);
 
 			Table parentTypeTable = desiredMetaData.findTable(tablename);
@@ -354,7 +356,7 @@ public class WidaContentMetaDataStructureManager {
 				throw new CmisRuntimeException(tablename
 						+ " table is not found in the database! Something went wrong. Please check startup of the repository for errors or the db for table existance.",
 						WidaErrorConstants.RUNTIME_EXCEPTION_CONTENT_TABLE_MISSING);
-			Column contentItemTableIdColumn = parentTypeTable.findColumn("id");
+			Column contentItemTableIdColumn = parentTypeTable.findColumn(WidaMetaDataConstants.METADATA_ID_COLUMN_NAME);
 			ForeignKey foreignKey = createForeignKey(multivaluetablename, tidColumn, parentTypeTable,
 					contentItemTableIdColumn);
 			multivalueTable.addForeignKey(foreignKey);
@@ -368,7 +370,7 @@ public class WidaContentMetaDataStructureManager {
 	}
 
 	private String createMultivalueTablename(PropertyDefinitionBase<?> propertyDefinition, String tablename) {
-		return tablename + "_multi_" + propertyDefinition.getColumnName();
+		return tablename + "_MULTI_" + propertyDefinition.getColumnName();
 	}
 
 	/**
@@ -428,12 +430,12 @@ public class WidaContentMetaDataStructureManager {
 			return;
 		Table typeTable = databaseModel.findTable(paramTypeBase.getTablename());
 		List<DynaBean> result = platform.fetch(databaseModel,
-				"SELECT * FROM " + asIdentifier(platform, typeTable.getName()) + " where id=" + paramId,
+				"SELECT * FROM " + asIdentifier(platform, typeTable.getName()) + " where "+WidaMetaDataConstants.METADATA_ID_COLUMN_NAME+"=" + paramId,
 				new Table[] { typeTable });
 		// for normal type tables it is only possible to have one row in it
-		if (result != null && result.size() > 0)
+		if (result != null && result.size() > 1)
 			throw new CmisRuntimeException(
-					"Found more than one row for " + paramId + " in table " + typeTable.getName());
+					"Found more than one row for id" + paramId + " in table " + typeTable.getName());
 		if (result != null) {
 			List<PropertyDefinitionBase<?>> propertyDefinitions = paramTypeBase.getPropertyDefinitionsList();
 			for (PropertyDefinitionBase<?> propertyDefinition : propertyDefinitions) {
@@ -455,7 +457,7 @@ public class WidaContentMetaDataStructureManager {
 			Platform platform, Map<String, Object> properties, Long paramId) {
 		Table multivalueTable = databaseModel.findTable(multivalueTableName);
 		List<DynaBean> result = platform.fetch(databaseModel,
-				"SELECT * FROM " + asIdentifier(platform, multivalueTableName) + " where parent_id=" + paramId,
+				"SELECT * FROM " + asIdentifier(platform, multivalueTableName) + " where PARENT_ID=" + paramId,
 				new Table[] { multivalueTable });
 		if (result != null) {
 			List<Object> values = new Vector<>();
@@ -476,7 +478,8 @@ public class WidaContentMetaDataStructureManager {
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Lock(LockType.WRITE)
 	public void reReadModel() {
-		databaseModel = platform.readModelFromDatabase(WidaMetaDataConstants.METADATA_DB_SCHEMA);
+		// no specific name is given so all tables are read
+		databaseModel = platform.readModelFromDatabase(null);
 	}
 
 	/**
@@ -545,9 +548,15 @@ public class WidaContentMetaDataStructureManager {
 		List<DynaBean> dynaBeans = new ArrayList<>();
 		for (TypeBase type : types) {
 			Table typeTable = databaseModel.findTable(type.getTablename());
+			System.out.println(typeTable);
+			Column[] columns = typeTable.getColumns();
+			for(Column c:columns)
+			{
+				System.out.println(c);
+			}
 			SqlDynaClass dynaClass = SqlDynaClass.newInstance(typeTable);
 			DynaBean tableDynaBean = new SqlDynaBean(dynaClass);
-			tableDynaBean.set("id", id);
+			tableDynaBean.set(WidaMetaDataConstants.METADATA_ID_COLUMN_NAME, id);
 			Map<String, Object> propertyValues = typeToPropertyMapping.get(type);
 			Set<String> propertyKeys = propertyValues.keySet();
 			List<PropertyDefinitionBase<?>> propertyDefinitions = type.getPropertyDefinitionsList();
@@ -566,7 +575,7 @@ public class WidaContentMetaDataStructureManager {
 								for(Object value:valuesCollection)
 								{
 									DynaBean tableMultiDynaBean = new SqlDynaBean(dynaMultiClass);
-									tableMultiDynaBean.set("parent_id", id);
+									tableMultiDynaBean.set("PARENT_ID", id);
 									tableMultiDynaBean.set(propertyDefinition.getColumnName(), value);
 									dynaBeans.add(tableMultiDynaBean);
 								}

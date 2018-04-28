@@ -44,12 +44,12 @@ import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
  * The Class BaseItem.
  */
 @Entity
-@Table(name = WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE, schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, indexes = {
-		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX+WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_object_id", columnList = "object_id", unique = true),
-		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX+WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_name", columnList = "name"),
-		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX+WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_discriminator", columnList = "discriminator"),
-		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX+WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_parent_id", columnList = "parent_id") })
-@DiscriminatorColumn(name = "discriminator")
+@Table(name = WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE,  indexes = {
+		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX+WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_OBJECT_ID", columnList = "OBJECT_ID", unique = true),
+		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX+WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_NAME", columnList = "NAME"),
+		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX+WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_DISCRIMINATOR", columnList = "DISCRIMINATOR"),
+		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX+WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_PARENT_ID", columnList = "PARENT_ID") })
+@DiscriminatorColumn(name = "DISCRIMINATOR")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class BaseItem {
 
@@ -98,7 +98,7 @@ public abstract class BaseItem {
 	 *
 	 * @return String - the name
 	 */
-	@Column(name = "name", length = 256, nullable = false)
+	@Column(name = "NAME", length = 256, nullable = false)
 	public String getName() {
 		return name;
 	}
@@ -118,7 +118,7 @@ public abstract class BaseItem {
 	 *
 	 * @return String - the object id
 	 */
-	@Column(name = "object_id", length = 144, nullable = false)
+	@Column(name = "OBJECT_ID", length = 144, nullable = false)
 	public String getObjectId() {
 		return objectId;
 	}
@@ -129,7 +129,7 @@ public abstract class BaseItem {
 	 *
 	 * @return String - the base type id
 	 */
-	@Column(name = "base_type_id", length = 50, nullable = false)
+	@Column(name = "BASE_TYPE_ID", length = 50, nullable = false)
 	public String getBaseTypeId() {
 		return baseTypeId;
 	}
@@ -149,7 +149,7 @@ public abstract class BaseItem {
 	 *
 	 * @return String - the object type id
 	 */
-	@Column(name = "object_type_id", length = 50, nullable = false)
+	@Column(name = "OBJECT_TYPE_ID", length = 50, nullable = false)
 	public String getObjectTypeId() {
 		return objectTypeId;
 	}
@@ -169,7 +169,7 @@ public abstract class BaseItem {
 	 *
 	 * @return String - the created by
 	 */
-	@Column(name = "created_by", length = 256, nullable = false)
+	@Column(name = "CREATED_BY", length = 256, nullable = false)
 	public String getCreatedBy() {
 		return createdBy;
 	}
@@ -189,7 +189,7 @@ public abstract class BaseItem {
 	 *
 	 * @return Calendar - the creation date
 	 */
-	@Column(name = "creation_date", nullable = false)
+	@Column(name = "CREATION_DATE", nullable = false)
 	public GregorianCalendar getCreationDate() {
 		return creationDate;
 	}
@@ -209,7 +209,7 @@ public abstract class BaseItem {
 	 *
 	 * @return String - the last modified by
 	 */
-	@Column(name = "last_modified_by", length = 256, nullable = false)
+	@Column(name = "LAST_MODIFIED_BY", length = 256, nullable = false)
 	public String getLastModifiedBy() {
 		return lastModifiedBy;
 	}
@@ -229,7 +229,7 @@ public abstract class BaseItem {
 	 *
 	 * @return Calendar - the last modification date
 	 */
-	@Column(name = "last_modification_date", nullable = false)
+	@Column(name = "LAST_MODIFICATION_DATE", nullable = false)
 	public GregorianCalendar getLastModificationDate() {
 		return lastModificationDate;
 	}
@@ -250,7 +250,7 @@ public abstract class BaseItem {
 	 * @return Folder - the parent
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "parent_id")
+	@JoinColumn(name = "PARENT_ID")
 	public Folder getParent() {
 		return parent;
 	}
@@ -271,7 +271,7 @@ public abstract class BaseItem {
 	 * @return Long - the id
 	 */
 	@Id
-	@Column(name = "id")
+	@Column(name = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME)
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	public Long getId() {
 		return id;
@@ -313,8 +313,8 @@ public abstract class BaseItem {
 	 * @return Set - the secondary type ids
 	 */
 	@ElementCollection
-	@CollectionTable(schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, name = WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_secondary_types", joinColumns = @JoinColumn(name = "item_id"))
-	@Column(name = "secondary_type_id")
+	@CollectionTable( name = WidaMetaDataConstants.METADATA_CONTENT_ITEM_TABLE+"_SECONDARY_TYPES", joinColumns = @JoinColumn(name = "ITEM_ID"))
+	@Column(name = "SECONDARY_TYPE_ID")
 	public Set<String> getSecondaryTypeIds() {
 		return secondaryTypeIds;
 	}

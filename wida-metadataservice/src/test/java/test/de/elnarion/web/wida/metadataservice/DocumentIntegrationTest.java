@@ -19,10 +19,15 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -32,12 +37,14 @@ import javax.transaction.UserTransaction;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import de.elnarion.web.wida.common.test.IntegrationTest;
 import de.elnarion.web.wida.metadataservice.domain.contentmetadata.Document;
+import de.elnarion.web.wida.metadataservice.domain.contentmetadata.Document_;
 import de.elnarion.web.wida.metadataservice.domain.contentmetadata.Folder;
 
 /**
@@ -52,7 +59,8 @@ public class DocumentIntegrationTest extends WildflyTestServerSetup {
 
 	@Inject
 	private UserTransaction userTransaction;
-	
+
+
 	/**
 	 * Test create object.
 	 *
@@ -72,22 +80,21 @@ public class DocumentIntegrationTest extends WildflyTestServerSetup {
 	 *             the heuristic rollback exception
 	 */
 	@Test
-	@InSequence(value = 1)
 	public void testCreateObject() throws NotSupportedException, SystemException, SecurityException,
 			IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException {
 		userTransaction.begin();
 		entityManager.joinTransaction();
 
-		Folder testFolder = new Folder();
-		testFolder.setBaseTypeId("cmis:folder");
-		testFolder.setCreatedBy("myself");
-		testFolder.setCreationDate(new GregorianCalendar());
-		testFolder.setLastModificationDate(new GregorianCalendar());
-		testFolder.setLastModifiedBy("someoneelse");
-		testFolder.setName("xfolder");
-		testFolder.setObjectTypeId("cmis:folder");
+		Folder testFolder = createFolder();
 		entityManager.persist(testFolder);
-		
+
+		Document document = createDocument(testFolder);
+
+		entityManager.persist(document);
+		userTransaction.commit();
+	}
+
+	private Document createDocument(Folder testFolder) {
 		Document document = new Document();
 		document.setBaseTypeId("cmis:document");
 		document.setCheckinComment(null);
@@ -111,14 +118,21 @@ public class DocumentIntegrationTest extends WildflyTestServerSetup {
 		document.setVersionSeriesCheckedOutId(null);
 		document.setVersionSeriesId(null);
 		document.setParent(testFolder);
-		
-		entityManager.persist(document);
-
-		userTransaction.commit();
-		// clear the persistence context (first-level cache)
-		entityManager.clear();
+		return document;
 	}
-	
+
+	private Folder createFolder() {
+		Folder testFolder = new Folder();
+		testFolder.setBaseTypeId("cmis:folder");
+		testFolder.setCreatedBy("myself");
+		testFolder.setCreationDate(new GregorianCalendar());
+		testFolder.setLastModificationDate(new GregorianCalendar());
+		testFolder.setLastModifiedBy("someoneelse");
+		testFolder.setName("xfolder");
+		testFolder.setObjectTypeId("cmis:folder");
+		return testFolder;
+	}
+
 	/**
 	 * Test update object.
 	 *
@@ -138,23 +152,54 @@ public class DocumentIntegrationTest extends WildflyTestServerSetup {
 	 *             the not supported exception
 	 */
 	@Test
-	@InSequence(value=2)
-	public void testUpdateObject() throws SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException, SystemException, NotSupportedException
-	{
+	public void testUpdateObject() throws SecurityException, IllegalStateException, RollbackException,
+			HeuristicMixedException, HeuristicRollbackException, SystemException, NotSupportedException {
 		userTransaction.begin();
 		entityManager.joinTransaction();
-		Document document = entityManager.find(Document.class, new Long(2));
-		document.setName("cool updated name");
+
+		Folder testFolder = createFolder();
+		entityManager.persist(testFolder);
+
+		Document document = createDocument(testFolder);
+
 		entityManager.persist(document);
 		userTransaction.commit();
 		entityManager.clear();
 		userTransaction.begin();
-		entityManager.joinTransaction();
-		Document documentUpdated = entityManager.find(Document.class,new Long(2));
-		assertEquals(document.getName(), documentUpdated.getName());
-		userTransaction.commit();
+		try {
+			entityManager.joinTransaction();
+			System.out.println("EntityManager part of the current transaction" + entityManager.isJoinedToTransaction());
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Document> query = cb.createQuery(Document.class);
+			Root<Document> rootCriteria = query.from(Document.class);
+			query.where(cb.equal(rootCriteria.get(Document_.id), document.getId()));
+			TypedQuery<Document> query2 = entityManager.createQuery(query);
+			try {
+				document = query2.getSingleResult();
+			} catch (Exception e) {
+				e.printStackTrace();
+				document=null;
+			}
+			if (document != null) {
+				document.setName("cool updated name");
+				entityManager.persist(document);
+				userTransaction.commit();
+				entityManager.clear();
+				userTransaction.begin();
+				entityManager.joinTransaction();
+				Document documentUpdated = entityManager.find(Document.class, document.getId());
+				assertEquals(document.getName(), documentUpdated.getName());
+				
+			}
+			else
+			{
+				Assert.assertTrue(false);
+			}
+		} finally {
+			userTransaction.commit();
+		}
 	}
-	
+
 	/**
 	 * Test delete object.
 	 *
@@ -174,16 +219,46 @@ public class DocumentIntegrationTest extends WildflyTestServerSetup {
 	 *             the heuristic rollback exception
 	 */
 	@Test
-	@InSequence(value=3)
-	public void testDeleteObject() throws NotSupportedException, SystemException, SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException
-	{
+	public void testDeleteObject() throws NotSupportedException, SystemException, SecurityException,
+			IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException {
 		userTransaction.begin();
 		entityManager.joinTransaction();
-		Document document= entityManager.find(Document.class,new Long(2));
-		Folder parentFolder = document.getParent();
-		entityManager.remove(document);
-		entityManager.remove(parentFolder);
+
+		Folder testFolder = createFolder();
+		entityManager.persist(testFolder);
+
+		Document document = createDocument(testFolder);
+
+		entityManager.persist(document);
+		
 		userTransaction.commit();
+		entityManager.clear();
+		userTransaction.begin();
+		try {
+			entityManager.joinTransaction();
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Document> query = cb.createQuery(Document.class);
+			Root<Document> rootCriteria = query.from(Document.class);
+			query.where(cb.equal(rootCriteria.get(Document_.id), document.getId()));
+			try {
+				document = entityManager.createQuery(query).getSingleResult();
+			} catch (Exception e) {
+				e.printStackTrace();
+				document=null;
+			}
+			if (document != null) {
+				Folder parentFolder = document.getParent();
+				entityManager.remove(document);
+				entityManager.remove(parentFolder);
+			}
+			else
+			{
+				Assert.assertTrue(false);
+			}
+		} finally {
+			userTransaction.commit();
+		}
 	}
 
+	
 }

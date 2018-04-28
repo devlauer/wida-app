@@ -50,11 +50,11 @@ import de.elnarion.web.wida.metadataservice.impl.TypeHelper;
  *            the generic type
  */
 @Entity
-@Table(name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE, schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, indexes = {
+@Table(name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE,  indexes = {
 		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX
 				+ WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-				+ "_query_name", columnList = "query_name") }, uniqueConstraints = {
-						@UniqueConstraint(columnNames = { "query_name" }) })
+				+ "_QUERY_NAME", columnList = "QUERY_NAME") }, uniqueConstraints = {
+						@UniqueConstraint(columnNames = { "QUERY_NAME" }) })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 		implements MutablePropertyDefinition<T> {
@@ -139,7 +139,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 * @return String - the id
 	 */
 	@Id
-	@Column(name = "id", length = 50, unique = true, nullable = false)
+	@Column(name = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME, length = 50, unique = true, nullable = false)
 	public String getId() {
 		return id;
 	}
@@ -159,7 +159,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return PropertyType - the property type
 	 */
-	@Column(name = "property_type", nullable = false)
+	@Column(name = "PROPERTY_TYPE", nullable = false)
 	@Enumerated(EnumType.STRING)
 	public PropertyType getPropertyType() {
 		return propertyType;
@@ -180,7 +180,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return Cardinality - the cardinality
 	 */
-	@Column(name = "cardinality", nullable = false)
+	@Column(name = "CARDINALITY", nullable = false)
 	@Enumerated(EnumType.STRING)
 	public Cardinality getCardinality() {
 		return cardinality;
@@ -201,7 +201,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return Updatability - the updatability
 	 */
-	@Column(name = "updatability", nullable = false)
+	@Column(name = "UPDATABILITY", nullable = false)
 	@Enumerated(EnumType.STRING)
 	public Updatability getUpdatability() {
 		return updatability;
@@ -252,7 +252,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return Boolean - the required
 	 */
-	@Column(name = "required", nullable = false)
+	@Column(name = "REQUIRED", nullable = false)
 	public Boolean isRequired() {
 		return required;
 	}
@@ -282,7 +282,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return Boolean - the queryable
 	 */
-	@Column(name = "queryable", nullable = false)
+	@Column(name = "QUERYABLE", nullable = false)
 	public Boolean isQueryable() {
 		return queryable;
 	}
@@ -312,7 +312,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return Boolean - the orderable
 	 */
-	@Column(name = "orderable", nullable = false)
+	@Column(name = "ORDERABLE", nullable = false)
 	public Boolean isOrderable() {
 		return orderable;
 	}
@@ -362,7 +362,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return String - the local name
 	 */
-	@Column(name = "local_name", nullable = true, length = 50)
+	@Column(name = "LOCAL_NAME", nullable = true, length = 50)
 	public String getLocalName() {
 		return localName;
 	}
@@ -382,7 +382,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return String - the local namespace
 	 */
-	@Column(name = "local_namespace", nullable = true, length = 100)
+	@Column(name = "LOCAL_NAMESPACE", nullable = true, length = 100)
 	public String getLocalNamespace() {
 		return localNamespace;
 	}
@@ -402,7 +402,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return String - the query name
 	 */
-	@Column(name = "query_name", nullable = true, length = 50)
+	@Column(name = "QUERY_NAME", nullable = true, length = 50)
 	public String getQueryName() {
 		return queryName;
 	}
@@ -422,7 +422,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return String - the display name
 	 */
-	@Column(name = "display_name", nullable = true, length = 50)
+	@Column(name = "DISPLAY_NAME", nullable = true, length = 50)
 	public String getDisplayName() {
 		return displayName;
 	}
@@ -442,7 +442,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return String - the description
 	 */
-	@Column(name = "description", nullable = true, length = 200)
+	@Column(name = "DESCRIPTION", nullable = true, length = 200)
 	public String getDescription() {
 		return description;
 	}
@@ -462,7 +462,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 *
 	 * @return String - the column name
 	 */
-	@Column(name = "column_name", nullable = false, length = WidaMetaDataConstants.MAX_NAME_LENGTH)
+	@Column(name = "COLUMN_NAME", nullable = false, length = WidaMetaDataConstants.MAX_NAME_LENGTH)
 	public String getColumnName() {
 		if(columnName==null)
 		{
@@ -488,7 +488,7 @@ public abstract class PropertyDefinitionBase<T> extends AbstractExtensionData
 	 * isOpenChoice()
 	 */
 	@Override
-	@Column(name = "openchoice")
+	@Column(name = "OPENCHOICE")
 	public Boolean isOpenChoice() {
 		return openChoice;
 	}

@@ -90,7 +90,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@EJB
 	private WidaContentMetaDataStructureManager structureManager;
 
-	private VersionLock versionLock;
+	private VersionLock versionLock=new VersionLock(WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY);
 
 	private Map<String, TypeBase> typedefinitions = new HashMap<>();
 	private Map<String, PropertyDefinitionBase<?>> propertydefinitions = new HashMap<>();
@@ -363,37 +363,44 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 
 		structureManager.updateDatabaseStructure(newRepoTypeDefinition, true);
 		entityManager.persist(newRepoTypeDefinition);
-		releaseWriteVersionLock(true);
+		releaseWriteVersionLock(true,true);
 		entityManager.flush();
 		reReadTypesMap();
 	}
 
-	private void releaseWriteVersionLock(boolean increaseVersion) {
+	private void releaseWriteVersionLock(boolean increaseVersion,boolean writeMode) {
+		VersionLock versionLockFromDb = getFromDb(writeMode);
 		if (increaseVersion)
-			versionLock.setVersion(versionLock.getVersion() + 1);
-		entityManager.persist(versionLock);
+			versionLockFromDb.setVersion(versionLockFromDb.getVersion() + 1);
+		entityManager.persist(versionLockFromDb);
+		entityManager.flush();
+		synchronized (versionLock) {
+			versionLock=versionLockFromDb;
+		}
 	}
 
 	private boolean checkVersionLockRenewed(boolean lockwriteMode) {
-		VersionLock versionFromDb = null;
-		try {
-			versionFromDb = getFromDb(lockwriteMode);
-			if (versionFromDb != null && versionLock != null) {
-				if (versionLock.getVersion() < versionFromDb.getVersion()) {
-					return true;
-				} else
-					return false;
+		synchronized (versionLock) {
+			VersionLock versionFromDb = null;
+			try {
+				versionFromDb = getFromDb(lockwriteMode);
+				if (versionFromDb != null && versionLock != null) {
+					if (versionLock.getVersion() < versionFromDb.getVersion()) {
+						return true;
+					} else
+						return false;
+				}
+			} catch (NoResultException e) {
+				// do nothing new version lock is already created in the code beneath
 			}
-		} catch (NoResultException e) {
-			// do nothing new version lock is already created in the code beneath
+			if (versionFromDb == null)
+				versionLock = new VersionLock(WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY);
+			else
+				versionLock.setVersion(versionFromDb.getVersion());
+			entityManager.persist(versionLock);
+			entityManager.flush();
+			return false;
 		}
-		if (versionFromDb == null)
-			versionLock = new VersionLock(WidaMetaDataConstants.METADATA_VERSION_LOCK_KEY);
-		else
-			versionLock.setVersion(versionFromDb.getVersion());
-		entityManager.persist(versionLock);
-		entityManager.flush();
-		return false;
 	}
 
 	private VersionLock getFromDb(boolean lockwriteMode) {
@@ -506,7 +513,7 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 			}
 		structureManager.dropTables(repoValue);
 		entityManager.remove(repoValue);
-		releaseWriteVersionLock(true);
+		releaseWriteVersionLock(true,true);
 		typedefinitions.remove(paramTypeId);
 	}
 
@@ -514,10 +521,6 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 		if (checkVersionLockRenewed(lockWriteMode)) {
 			reReadTypesMap();
 			structureManager.reReadModel();
-			synchronized (versionLock) {
-				VersionLock versionLockFromDB = getFromDb(lockWriteMode);
-				versionLock.setVersion(versionLockFromDB.getVersion());
-			}
 		}
 	}
 
@@ -570,7 +573,8 @@ public class WidaTypeMetaDataServiceImpl implements WidaTypeMetaDataService, Wid
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Lock(LockType.READ)
 	public PropertyDefinition<?> getPropertyDefinition(String paramPropertyId) {
-		checkVersionLockRenewed(false);
+		if(checkVersionLockRenewed(false))
+			reReadTypesMap();
 		PropertyDefinition<?> propDef = propertydefinitions.get(paramPropertyId);
 		if (propDef != null) {
 			return typeDefinitionFactory.copy(propDef);

@@ -41,10 +41,10 @@ import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
 @Entity
 @DiscriminatorValue("html")
 @SecondaryTable(name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-		+ "_html", schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, pkJoinColumns = {
+		+ "_HTML",  pkJoinColumns = {
 				@PrimaryKeyJoinColumn(name = WidaMetaDataConstants.METADATA_PK_PREFIX
 						+ WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-						+ "_html_id", referencedColumnName = "id") })
+						+ "_HTML_ID", referencedColumnName = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME) })
 public class PropertyDefinitionHTML extends PropertyDefinitionBase<String>
 		implements MutablePropertyHtmlDefinition {
 
@@ -78,9 +78,9 @@ public class PropertyDefinitionHTML extends PropertyDefinitionBase<String>
 
 	@Override
 	@ElementCollection
-	@CollectionTable(schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-			+ "_html_default", joinColumns = @JoinColumn(name = "prop_def_id"))
-	@Column(name = "default_value")
+	@CollectionTable( name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
+			+ "_HTML_DEFAULT", joinColumns = @JoinColumn(name = "PROP_DEF_ID"))
+	@Column(name = "DEFAULT_VALUE")
 	public List<String> getDefaultValue() {
 		return super.getDefaultValue();
 	}

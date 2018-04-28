@@ -119,8 +119,6 @@ public class WildflyTestServerSetup {
 				.addPackage(BaseItem.class.getPackage())
 				.addPackage(WildflyTestServerSetup.class.getPackage())
 				.addAsResource("test-persistence.xml", "META-INF/persistence.xml")
-				.addAsResource("META-INF/sql/create_schema_wida.sql")
-				.addAsResource("drop_schema_wida.sql", "META-INF/sql/drop_schema_wida.sql")
 				.addAsResource("META-INF/ejb-jar.xml").addAsResource("META-INF/jboss-ejb3.xml");
 
 		ear.addAsLibraries(libraries);

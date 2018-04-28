@@ -41,10 +41,10 @@ import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
 @Entity
 @DiscriminatorValue("boolean")
 @SecondaryTable(name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-		+ "_boolean", schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, pkJoinColumns = {
+		+ "_BOOLEAN",  pkJoinColumns = {
 				@PrimaryKeyJoinColumn(name = WidaMetaDataConstants.METADATA_PK_PREFIX
 						+ WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-						+ "_boolean_id", referencedColumnName = "id") })
+						+ "_BOOLEAN_ID", referencedColumnName = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME) })
 public class PropertyDefinitionBoolean extends PropertyDefinitionBase<Boolean>
 		implements MutablePropertyBooleanDefinition {
 
@@ -77,8 +77,8 @@ public class PropertyDefinitionBoolean extends PropertyDefinitionBase<Boolean>
 
 	@Override
 	@ElementCollection
-	@CollectionTable(schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE +"_boolean_default", joinColumns = @JoinColumn(name = "prop_def_id"))
-	@Column(name = "default_value")
+	@CollectionTable( name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE +"_BOOLEAN_DEFAULT", joinColumns = @JoinColumn(name = "PROP_DEF_ID"))
+	@Column(name = "DEFAULT_VALUE")
 	public List<Boolean> getDefaultValue() {
 		return super.getDefaultValue();
 	}

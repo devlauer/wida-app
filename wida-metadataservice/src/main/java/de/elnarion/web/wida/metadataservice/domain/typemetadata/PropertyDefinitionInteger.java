@@ -42,10 +42,10 @@ import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
 @Entity
 @DiscriminatorValue("integer")
 @SecondaryTable(name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-		+ "_integer", schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, pkJoinColumns = {
+		+ "_INTEGER",  pkJoinColumns = {
 				@PrimaryKeyJoinColumn(name = WidaMetaDataConstants.METADATA_PK_PREFIX
 						+ WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-						+ "_integer_id", referencedColumnName = "id") })
+						+ "_INTEGER_ID", referencedColumnName = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME) })
 public class PropertyDefinitionInteger extends PropertyDefinitionBase<BigInteger>
 		implements MutablePropertyIntegerDefinition {
 
@@ -88,7 +88,7 @@ public class PropertyDefinitionInteger extends PropertyDefinitionBase<BigInteger
 	 *
 	 * @return BigInteger - the min value
 	 */
-	@Column(name = "min_value", table = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE + "_integer")
+	@Column(name = "MIN_VALUE", table = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE + "_INTEGER")
 	public BigInteger getMinValue() {
 		return minValue;
 	}
@@ -108,7 +108,7 @@ public class PropertyDefinitionInteger extends PropertyDefinitionBase<BigInteger
 	 *
 	 * @return BigInteger - the max value
 	 */
-	@Column(name = "max_value", table = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE + "_integer")
+	@Column(name = "MAX_VALUE", table = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE + "_INTEGER")
 	public BigInteger getMaxValue() {
 		return maxValue;
 	}
@@ -125,9 +125,9 @@ public class PropertyDefinitionInteger extends PropertyDefinitionBase<BigInteger
 
 	@Override
 	@ElementCollection
-	@CollectionTable(schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
-			+ "_integer_default", joinColumns = @JoinColumn(name = "prop_def_id"))
-	@Column(name = "default_value")
+	@CollectionTable(name = WidaMetaDataConstants.METADATA_TYPE_PROPERTYDEFINITION_TABLE
+			+ "_INTEGER_DEFAULT", joinColumns = @JoinColumn(name = "PROP_DEF_ID"))
+	@Column(name = "DEFAULT_VALUE")
 	public List<BigInteger> getDefaultValue() {
 		return super.getDefaultValue();
 	}

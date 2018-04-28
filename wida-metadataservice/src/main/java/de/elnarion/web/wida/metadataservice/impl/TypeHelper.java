@@ -42,6 +42,7 @@ public class TypeHelper implements WidaErrorConstants {
 						"The alphanumeric part of the id should not be bigger than 30 characters!",
 						WidaErrorConstants.CONSTRAINT_NAME_TOO_BIG);
 			}
+			paramTypeId = paramTypeId.toUpperCase();
 		}
 		return paramTypeId;
 	}

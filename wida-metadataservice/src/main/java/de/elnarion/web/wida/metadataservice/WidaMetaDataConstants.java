@@ -23,16 +23,13 @@ public interface WidaMetaDataConstants {
 	// global
 	
 	/** The Constant METADATA_TYPE_PK_PREFIX. */
-	public static final String METADATA_PK_PREFIX = "pk_";
+	public static final String METADATA_PK_PREFIX = "PK_";
 
 	/** The Constant METADATA_CONTENT_INDEX_PREFIX. */
-	public final static String METADATA_INDEX_PREFIX = "x_";
+	public final static String METADATA_INDEX_PREFIX = "X_";
 
 	/** The Constant METADATA_FOREIGN_KEY_PREFIX. */
-	public static final String METADATA_FOREIGN_KEY_PREFIX = "fk_";
-	
-	/** The Constant METADATASERVICE_DB_SCHEMA. */
-	public static final String METADATA_DB_SCHEMA = "wida";
+	public static final String METADATA_FOREIGN_KEY_PREFIX = "FK_";
 	
 	/** The Constant MAX_NAME_LENGTH. */
 	public static final int MAX_NAME_LENGTH =30;
@@ -45,41 +42,44 @@ public interface WidaMetaDataConstants {
 
 	
 	// content metadata specific 
+
+	/** The Constant METADATA_ID_COLUMN_NAME. */
+	public final static String METADATA_ID_COLUMN_NAME = "ID";
 	
 	/** The Constant CONTENT_METADATA_TABLE_PREFIX. */
-	public final static String METADATA_CONTENT_TABLE_PREFIX = "cm_";
+	public final static String METADATA_CONTENT_TABLE_PREFIX = "CM_";
 	
 	/** The Constant METADATA_CONTENT_ITEM_TABLE. */
-	public static final String METADATA_CONTENT_ITEM_TABLE = METADATA_CONTENT_TABLE_PREFIX+"item";
+	public static final String METADATA_CONTENT_ITEM_TABLE = METADATA_CONTENT_TABLE_PREFIX+"ITEM";
 	
 	/** The Constant METADATA_CONTENT_DOCUMENT_TABLE. */
-	public static final String METADATA_CONTENT_DOCUMENT_TABLE = METADATA_CONTENT_TABLE_PREFIX+"document";
+	public static final String METADATA_CONTENT_DOCUMENT_TABLE = METADATA_CONTENT_TABLE_PREFIX+"DOCUMENT";
 	
 	// type metadata specific
 	
 	/** The Constant METADATA_TYPE_TABLE_PREFIX. */
-	public static final String METADATA_TYPE_TABLE_PREFIX = "ty_";
+	public static final String METADATA_TYPE_TABLE_PREFIX = "TY_";
 	
 	/** The Constant METADATA_TYPE_PROPERTYDEFINITION_TABLE. */
-	public static final String METADATA_TYPE_PROPERTYDEFINITION_TABLE = METADATA_TYPE_TABLE_PREFIX+"propdef";
+	public static final String METADATA_TYPE_PROPERTYDEFINITION_TABLE = METADATA_TYPE_TABLE_PREFIX+"PROPDEF";
 
 	/** The Constant METADATA_TYPE_TYPEBASE_DEFINITION_TABLE. */
-	public static final String METADATA_TYPE_TYPEBASE_DEFINITION_TABLE = METADATA_TYPE_TABLE_PREFIX+"typebase";
+	public static final String METADATA_TYPE_TYPEBASE_DEFINITION_TABLE = METADATA_TYPE_TABLE_PREFIX+"TYPEBASE";
 
 	/** The Constant METADATA_TYPE_VERSION_LOCK_TABLE. */
-	public static final String METADATA_TYPE_VERSION_LOCK_TABLE = METADATA_TYPE_TABLE_PREFIX+"versionlock";
+	public static final String METADATA_TYPE_VERSION_LOCK_TABLE = METADATA_TYPE_TABLE_PREFIX+"VERSIONLOCK";
 	
 	/** The Constant METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE. */
-	public static final String METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE = METADATA_TYPE_TABLE_PREFIX+"typedocument";
+	public static final String METADATA_TYPE_TYPE_DOCUMENT_DEFINITION_TABLE = METADATA_TYPE_TABLE_PREFIX+"TYPEDOCUMENT";
 
 	/** The Constant TYPE_TO_SECONDARY_TYPE_TABLE. */
-	public static final String METADATA_TYPE_TYPE_TO_SECONDARY_TYPE_TABLE = METADATA_TYPE_TABLE_PREFIX+"type_to_secondary_type";
+	public static final String METADATA_TYPE_TYPE_TO_SECONDARY_TYPE_TABLE = METADATA_TYPE_TABLE_PREFIX+"TYPE_TO_SECONDARY_TYPE";
 
 	/** The Constant METADATA_TYPE_TYPE_TO_PROPERTY_TYPE_TABLE. */
-	public static final String METADATA_TYPE_TYPE_TO_PROPERTY_TYPE_TABLE = METADATA_TYPE_TABLE_PREFIX+"type_to_prop_def";
+	public static final String METADATA_TYPE_TYPE_TO_PROPERTY_TYPE_TABLE = METADATA_TYPE_TABLE_PREFIX+"TYPE_TO_PROP_DEF";
 	
 	/** The Constant METADATA_VERSION_LOCK_KEY. */
-	public static final String METADATA_VERSION_LOCK_KEY = "type_version_lock";
+	public static final String METADATA_VERSION_LOCK_KEY = "TYPE_VERSION_LOCK";
 
 	// type mapping
 	

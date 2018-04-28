@@ -68,13 +68,13 @@ import de.elnarion.web.wida.metadataservice.impl.TypeHelper;
  *
  */
 @Entity
-@Table(name = WidaMetaDataConstants.METADATA_TYPE_TYPEBASE_DEFINITION_TABLE, schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, indexes = {
+@Table(name = WidaMetaDataConstants.METADATA_TYPE_TYPEBASE_DEFINITION_TABLE,  indexes = {
 		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX
-				+ WidaMetaDataConstants.METADATA_TYPE_TYPEBASE_DEFINITION_TABLE + "_id", columnList = "parent_id"),
+				+ WidaMetaDataConstants.METADATA_TYPE_TYPEBASE_DEFINITION_TABLE + "_ID", columnList = "PARENT_ID"),
 		@Index(name = WidaMetaDataConstants.METADATA_INDEX_PREFIX
 				+ WidaMetaDataConstants.METADATA_TYPE_TYPEBASE_DEFINITION_TABLE
-				+ "_query_name", columnList = "query_name") }, uniqueConstraints = {
-						@UniqueConstraint(columnNames = { "query_name" }) })
+				+ "_QUERY_NAME", columnList = "QUERY_NAME") }, uniqueConstraints = {
+						@UniqueConstraint(columnNames = { "QUERY_NAME" }) })
 @DiscriminatorColumn(name = "discriminator")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class TypeBase extends AbstractTypeDefinition
@@ -306,7 +306,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 * @return String - the id
 	 */
 	@Id
-	@Column(name = "id", length = 50, unique = true, nullable = false)
+	@Column(name = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME, length = 50, unique = true, nullable = false)
 	public String getId() {
 		return super.getId();
 	}
@@ -346,7 +346,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return String - the parent id
 	 */
-	@Column(name = "parent_id", nullable = true, length = 50)
+	@Column(name = "PARENT_ID", nullable = true, length = 50)
 	public String getParentTypeId() {
 		return super.getParentTypeId();
 	}
@@ -376,7 +376,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the creatable
 	 */
-	@Column(name = "creatable", nullable = false)
+	@Column(name = "CREATABLE", nullable = false)
 	public Boolean isCreatable() {
 		return super.isCreatable();
 	}
@@ -406,7 +406,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the fileable
 	 */
-	@Column(name = "fileable", nullable = false)
+	@Column(name = "FILEABLE", nullable = false)
 	public Boolean isFileable() {
 		return super.isFileable();
 	}
@@ -436,7 +436,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the queryable
 	 */
-	@Column(name = "queryable", nullable = false)
+	@Column(name = "QUERYABLE", nullable = false)
 	public Boolean isQueryable() {
 		return super.isQueryable();
 	}
@@ -466,7 +466,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the controllable policy
 	 */
-	@Column(name = "controllable_policy", nullable = false)
+	@Column(name = "CONTROLLABLE_POLICY", nullable = false)
 	public Boolean isControllablePolicy() {
 		return super.isControllablePolicy();
 	}
@@ -496,7 +496,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the controllable ACL
 	 */
-	@Column(name = "controllable_acl", nullable = false)
+	@Column(name = "CONTROLLABLE_ACL", nullable = false)
 	public Boolean isControllableAcl() {
 		return super.isControllableAcl();
 	}
@@ -526,7 +526,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the fulltext indexed
 	 */
-	@Column(name = "fulltext_indexed", nullable = false)
+	@Column(name = "FULLTEXT_INDEXED", nullable = false)
 	public Boolean isFulltextIndexed() {
 		return super.isFulltextIndexed();
 	}
@@ -556,7 +556,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the included in super type query
 	 */
-	@Column(name = "included_in_super_type_query", nullable = false)
+	@Column(name = "INCLUDED_IN_SUPER_TYPE_QUERY", nullable = false)
 	public Boolean isIncludedInSupertypeQuery() {
 		return super.isIncludedInSupertypeQuery();
 	}
@@ -586,7 +586,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return String - the local name
 	 */
-	@Column(name = "local_name", nullable = true, length = 50)
+	@Column(name = "LOCAL_NAME", nullable = true, length = 50)
 	public String getLocalName() {
 		return super.getLocalName();
 	}
@@ -606,7 +606,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return String - the local namespace
 	 */
-	@Column(name = "local_namespace", nullable = true, length = 100)
+	@Column(name = "LOCAL_NAMESPACE", nullable = true, length = 100)
 	public String getLocalNamespace() {
 		return super.getLocalNamespace();
 	}
@@ -626,7 +626,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return String - the query name
 	 */
-	@Column(name = "query_name", nullable = true, length = 50)
+	@Column(name = "QUERY_NAME", nullable = true, length = 50)
 	public String getQueryName() {
 		return super.getQueryName();
 	}
@@ -646,7 +646,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return String - the display name
 	 */
-	@Column(name = "display_name", nullable = true, length = 50)
+	@Column(name = "DISPLAY_NAME", nullable = true, length = 50)
 	public String getDisplayName() {
 		return super.getDisplayName();
 	}
@@ -666,7 +666,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return String - the description
 	 */
-	@Column(name = "description", nullable = true, length = 200)
+	@Column(name = "DESCRIPTION", nullable = true, length = 200)
 	public String getDescription() {
 		return super.getDescription();
 	}
@@ -686,7 +686,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the type mutability create
 	 */
-	@Column(name = "tm_create", nullable = true)
+	@Column(name = "TM_CREATE", nullable = true)
 	public Boolean getTypeMutabilityCreate() {
 		return typeMutabilityCreate;
 	}
@@ -706,7 +706,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the type mutability update
 	 */
-	@Column(name = "tm_update", nullable = true)
+	@Column(name = "TM_UPDATE", nullable = true)
 	public Boolean getTypeMutabilityUpdate() {
 		return typeMutabilityUpdate;
 	}
@@ -726,7 +726,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return Boolean - the type mutabiltiy delete
 	 */
-	@Column(name = "tm_delete", nullable = true)
+	@Column(name = "TM_DELETE", nullable = true)
 	public Boolean getTypeMutabiltiyDelete() {
 		return typeMutabiltiyDelete;
 	}
@@ -747,7 +747,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 * @return List - the secondary types
 	 */
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = WidaMetaDataConstants.METADATA_TYPE_TYPE_TO_SECONDARY_TYPE_TABLE, schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, joinColumns = @JoinColumn(name = "id"), inverseJoinColumns = @JoinColumn(name = "secondary_type_id"))
+	@JoinTable(name = WidaMetaDataConstants.METADATA_TYPE_TYPE_TO_SECONDARY_TYPE_TABLE,  joinColumns = @JoinColumn(name = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME), inverseJoinColumns = @JoinColumn(name = "SECONDARY_TYPE_ID"))
 	public Set<TypeSecondary> getSecondaryTypes() {
 		return secondaryTypes;
 	}
@@ -768,7 +768,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 * @return List - the property definitions
 	 */
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = WidaMetaDataConstants.METADATA_TYPE_TYPE_TO_PROPERTY_TYPE_TABLE, schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, joinColumns = @JoinColumn(name = "id"), inverseJoinColumns = @JoinColumn(name = "prop_def_id"))
+	@JoinTable(name = WidaMetaDataConstants.METADATA_TYPE_TYPE_TO_PROPERTY_TYPE_TABLE, joinColumns = @JoinColumn(name = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME), inverseJoinColumns = @JoinColumn(name = "PROP_DEF_ID"))
 	public List<PropertyDefinitionBase<?>> getPropertyDefinitionsList() {
 		return propertyDefinitionsList;
 	}
@@ -789,7 +789,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return String - the tablename
 	 */
-	@Column(name = "tablename", nullable = false, length = WidaMetaDataConstants.MAX_NAME_LENGTH)
+	@Column(name = "TABLENAME", nullable = false, length = WidaMetaDataConstants.MAX_NAME_LENGTH)
 	public String getTablename() {
 		if (tablename == null)
 			tablename = WidaMetaDataConstants.METADATA_CONTENT_TABLE_PREFIX
@@ -849,7 +849,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 * @return TypeBase - the parent
 	 */
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "parent_id", insertable = false, updatable = false)
+	@JoinColumn(name = "PARENT_ID", insertable = false, updatable = false)
 	public abstract TypeBase getParent();
 
 	/**
@@ -875,7 +875,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	private List<PropertyDefinitionBase<?>> getPropertyDefinitionsListWithInherited() {
 		List<PropertyDefinitionBase<?>> completeList = new ArrayList<>();
 		completeList.addAll(propertyDefinitionsList);
-		if (isInheritProperties()&&getParent()!=null) {
+		if (isInheritProperties()!=null&&isInheritProperties()&&getParent()!=null) {
 			List<PropertyDefinitionBase<?>> parentList = getParent()
 					.getPropertyDefinitionsListWithInherited();
 			completeList.addAll(parentList);
@@ -987,7 +987,7 @@ public abstract class TypeBase extends AbstractTypeDefinition
 	 *
 	 * @return the boolean
 	 */
-	@Column(name = "inherit_properties")
+	@Column(name = "INHERIT_PROPERTIES")
 	public Boolean isInheritProperties() {
 		return inheritProperties;
 	}

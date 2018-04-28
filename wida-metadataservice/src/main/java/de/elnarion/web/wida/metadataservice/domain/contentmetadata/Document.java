@@ -37,8 +37,8 @@ import de.elnarion.web.wida.metadataservice.WidaMetaDataConstants;
  */
 @Entity
 @DiscriminatorValue("document")
-@SecondaryTable(name = WidaMetaDataConstants.METADATA_CONTENT_DOCUMENT_TABLE, schema = WidaMetaDataConstants.METADATA_DB_SCHEMA, pkJoinColumns = {
-		@PrimaryKeyJoinColumn(name = "documenttype_id", referencedColumnName = "id") })
+@SecondaryTable(name = WidaMetaDataConstants.METADATA_CONTENT_DOCUMENT_TABLE,  pkJoinColumns = {
+		@PrimaryKeyJoinColumn(name = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME, referencedColumnName = WidaMetaDataConstants.METADATA_ID_COLUMN_NAME) })
 public class Document extends BaseItem {
 
 	/**
@@ -304,7 +304,7 @@ public class Document extends BaseItem {
 	 *
 	 * @return BigInteger - the content stream length
 	 */
-	@Column(name = "content_stream_length", table = "cm_document", nullable = false)
+	@Column(name = "CONTENT_STREAM_LENGTH", table = WidaMetaDataConstants.METADATA_CONTENT_DOCUMENT_TABLE, nullable = false)
 	public BigInteger getContentStreamLength() {
 		return contentStreamLength;
 	}
@@ -324,7 +324,7 @@ public class Document extends BaseItem {
 	 *
 	 * @return String - the content stream mime type
 	 */
-	@Column(name = "content_stream_mime_type", table = "cm_document", length = 128, nullable = false)
+	@Column(name = "CONTENT_STREAM_MIME_TYPE", table = WidaMetaDataConstants.METADATA_CONTENT_DOCUMENT_TABLE, length = 128, nullable = false)
 	public String getContentStreamMimeType() {
 		return contentStreamMimeType;
 	}
@@ -344,7 +344,7 @@ public class Document extends BaseItem {
 	 *
 	 * @return String - the content stream file name
 	 */
-	@Column(name = "content_stream_file_name", table = "cm_document", length = 256, nullable = false)
+	@Column(name = "CONTENT_STREAM_FILE_NAME", table = WidaMetaDataConstants.METADATA_CONTENT_DOCUMENT_TABLE, length = 256, nullable = false)
 	public String getContentStreamFileName() {
 		return contentStreamFileName;
 	}
@@ -364,7 +364,7 @@ public class Document extends BaseItem {
 	 *
 	 * @return String - the content stream id
 	 */
-	@Column(name = "content_stream_id", table = "cm_document", nullable = false, unique = true)
+	@Column(name = "CONTENT_STREAM_ID", table = WidaMetaDataConstants.METADATA_CONTENT_DOCUMENT_TABLE, nullable = false, unique = true)
 	public String getContentStreamId() {
 		return contentStreamId;
 	}
@@ -384,7 +384,7 @@ public class Document extends BaseItem {
 	 *
 	 * @return String - the storage id
 	 */
-	@Column(name = "storage_id", table = "cm_document", length = 400)
+	@Column(name = "STORAGE_ID", table = WidaMetaDataConstants.METADATA_CONTENT_DOCUMENT_TABLE, length = 400)
 	public String getStorageId() {
 		return storageId;
 	}
