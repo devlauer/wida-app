@@ -21,12 +21,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import javax.enterprise.util.Nonbinding;
-import javax.xml.ws.BindingType;
 
 /**
  * The Interface PropertiesResource.
  */
-@BindingType
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.FIELD, ElementType.METHOD,
         ElementType.PARAMETER })
